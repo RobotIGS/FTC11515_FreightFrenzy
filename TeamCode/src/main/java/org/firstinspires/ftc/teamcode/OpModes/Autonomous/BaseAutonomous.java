@@ -63,11 +63,15 @@ public abstract class BaseAutonomous extends LinearOpMode {
         // TODO
     }
 
-    public void placeElement() {
+    public void placeElementAtBottom() {
         // TODO
     }
 
     public void driveToWall() {
         // TODO 
+    }
+
+    public void placeElementAtPosition() {
+        // TODO
     }
 }
