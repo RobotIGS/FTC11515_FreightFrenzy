@@ -70,4 +70,8 @@ public abstract class BaseAutonomous extends LinearOpMode {
     public void driveToWall() {
         // TODO 
     }
+
+    public void detectPositionBarcode(){
+        // TODO
+    }
 }
