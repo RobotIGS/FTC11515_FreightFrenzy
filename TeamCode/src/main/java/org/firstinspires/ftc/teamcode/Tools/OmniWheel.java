@@ -19,10 +19,10 @@ public class OmniWheel {
      */
     public OmniWheelResults calculateWheelSpeeds(double forwardVelocity, double sidewardsVelocity, double rotationVelocity) {
         return new OmniWheelResults(
-                forwardVelocity * -sidewardsVelocity * -rotationVelocity,
-                forwardVelocity * sidewardsVelocity * rotationVelocity,
-                forwardVelocity * sidewardsVelocity * -rotationVelocity,
-                forwardVelocity * -sidewardsVelocity * rotationVelocity
+                forwardVelocity + -sidewardsVelocity + rotationVelocity,
+                forwardVelocity + sidewardsVelocity + -rotationVelocity,
+                forwardVelocity + sidewardsVelocity + rotationVelocity,
+                forwardVelocity + -sidewardsVelocity + -rotationVelocity
         );
     }
 

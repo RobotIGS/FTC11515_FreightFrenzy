@@ -12,6 +12,6 @@ public class FullControl extends BaseTeleOp {
 
     @Override
     public void loop() {
-        omniWheel.setMotors(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
+        omniWheel.setMotors(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x);
     }
 }
