@@ -15,7 +15,7 @@ public abstract class FullAutonomous extends BaseAutonomous {
         driveToCarousel();
         rotateCarousel();
         driveToShippingHub();
-        placeElement();
+        placeElementAtPosition();
         driveToWall();
         parkInWarehouse();
     }
