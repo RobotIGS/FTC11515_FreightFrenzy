@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.OpModes.TeleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
 
+@TeleOp
 public class FullControl extends BaseTeleOp {
     @Override
     public void initialize() {
