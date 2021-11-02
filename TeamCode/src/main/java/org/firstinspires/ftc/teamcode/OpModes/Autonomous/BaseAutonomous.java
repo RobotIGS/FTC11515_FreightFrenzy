@@ -1,11 +1,15 @@
 package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
 import org.firstinspires.ftc.teamcode.Tools.ColorEnum;
+import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
 
 public abstract class BaseAutonomous extends LinearOpMode {
     BaseHardwareMap robot;
+    OmniWheel omniWheel;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -16,6 +20,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
 
     void initialize() {
         robot = initializeHardwareMap();
+        omniWheel = new OmniWheel(robot);
         // TODO
     }
 
@@ -34,6 +39,23 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void parkInWarehouse() {
-        // TODO
+        // TODO:
+    }
+
+    public int driveToCake(){
+        int level = 1;
+
+        // TODO: Drive forward with encoders
+
+        if(robot.distanceSensor_front_mid.getDistance(DistanceUnit.CM)<=10) { //THIS VALUE NEEDS TO BE TESTED!! (Paul.U)
+            level = 2;
+        }
+
+        // TODO: Drive sidewards with encoders
+
+        if(robot.distanceSensor_front_mid.getDistance(DistanceUnit.CM)<=10) { //THIS VALUE NEEDS TO BE TESTED!! (Paul.U)
+            level = 3;
+        }
+        return level;
     }
 }
