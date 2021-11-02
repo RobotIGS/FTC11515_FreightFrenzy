@@ -58,4 +58,16 @@ public abstract class BaseAutonomous extends LinearOpMode {
         }
         return level;
     }
+
+    public void driveToShippingHub() {
+        // TODO
+    }
+
+    public void placeElement() {
+        // TODO
+    }
+
+    public void driveToWall() {
+        // TODO 
+    }
 }
