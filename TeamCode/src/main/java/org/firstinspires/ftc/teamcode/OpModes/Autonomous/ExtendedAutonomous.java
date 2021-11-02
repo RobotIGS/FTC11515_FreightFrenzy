@@ -13,6 +13,9 @@ public abstract class ExtendedAutonomous extends BaseAutonomous {
     public void run() {
         driveToCarousel();
         rotateCarousel();
+        driveToShippingHub();
+        placeElementAtBottom();
+        driveToWall();
         parkInWarehouse();
     }
 }
