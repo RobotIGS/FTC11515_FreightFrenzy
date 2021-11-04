@@ -12,6 +12,8 @@ public abstract class BaseHardwareMap {
     public DcMotor motor_front_left;
     public DcMotor motor_rear_right;
     public DcMotor motor_rear_left;
+    public DcMotor motor_shovel;
+    public DcMotor motor_lift;
     public DistanceSensor distanceSensor_front_mid;
 
     public BaseHardwareMap(HardwareMap hwMap) {
