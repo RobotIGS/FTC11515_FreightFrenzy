@@ -25,19 +25,13 @@ public class GyroTest extends OpMode {
         Orientation angles;
         angles = hwgy.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-        telemetry.addData("values0" , angles.angleUnit);
-
-        telemetry.addData("values1" , angles.acquisitionTime);
-
-        telemetry.addData("values2" , angles.firstAngle);
-
-        telemetry.addData("values4" , angles.secondAngle);
-
-        telemetry.addData("values5" , angles.thirdAngle);
-
-        telemetry.addData("values6" , angles.axesOrder);
-
-        telemetry.addData("values7" , angles.axesReference);
+        telemetry.addData("valuesAngleUnit" , angles.angleUnit);
+        telemetry.addData("valuesAcquisitionTime" , angles.acquisitionTime);
+        telemetry.addData("valuesFirstAngle" , angles.firstAngle);
+        telemetry.addData("valuesSecondAngle" , angles.secondAngle);
+        telemetry.addData("valuesThirdAngle" , angles.thirdAngle);
+        telemetry.addData("valuesAxesOrder" , angles.axesOrder);
+        telemetry.addData("valuesAxesReference" , angles.axesReference);
         telemetry.update();
 
     }
