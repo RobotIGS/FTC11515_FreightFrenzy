@@ -5,6 +5,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 public class FullHardwareMap extends BaseHardwareMap {
+    public FullHardwareMap(HardwareMap hwMap) {
+        super(hwMap);
+    }
+
     @Override
     public void init(HardwareMap hwMap) {
         motor_front_left = hwMap.get(DcMotor.class, "hub1_motorport0");
@@ -20,10 +24,12 @@ public class FullHardwareMap extends BaseHardwareMap {
         motor_rear_right.setDirection(DcMotor.Direction.REVERSE);
         motor_shovel.setDirection(DcMotorSimple.Direction.FORWARD);
         motor_lift.setDirection(DcMotorSimple.Direction.FORWARD);
-        motor_lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-    }
 
-    public FullHardwareMap(HardwareMap hwMap) {
-        super(hwMap);
+        this.motor_front_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.motor_front_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.motor_rear_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        this.motor_rear_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        motor_lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 }

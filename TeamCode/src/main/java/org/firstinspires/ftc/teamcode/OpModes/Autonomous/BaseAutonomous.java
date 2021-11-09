@@ -5,11 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
 import org.firstinspires.ftc.teamcode.Tools.ColorEnum;
+import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
 import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
 
 public abstract class BaseAutonomous extends LinearOpMode {
     BaseHardwareMap robot;
     OmniWheel omniWheel;
+    ControlledDrive controlledDrive;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -21,7 +23,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
     void initialize() {
         robot = initializeHardwareMap();
         omniWheel = new OmniWheel(robot);
-        // TODO
+        controlledDrive = new ControlledDrive(robot, this);
     }
 
     public abstract BaseHardwareMap initializeHardwareMap();

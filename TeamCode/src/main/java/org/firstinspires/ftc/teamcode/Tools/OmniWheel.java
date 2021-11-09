@@ -17,7 +17,7 @@ public class OmniWheel {
      * @param rotationVelocity  vehicle rotational velocity
      * @return a OmniWheelResults object containing the wheel speeds
      */
-    public OmniWheelResults calculateWheelSpeeds(double forwardVelocity, double sidewardsVelocity, double rotationVelocity) {
+    public static OmniWheelResults calculateWheelSpeeds(double forwardVelocity, double sidewardsVelocity, double rotationVelocity) {
         return new OmniWheelResults(
                 forwardVelocity + -sidewardsVelocity + rotationVelocity,
                 forwardVelocity + sidewardsVelocity + -rotationVelocity,
