@@ -20,10 +20,10 @@ public class FullControl extends BaseTeleOp {
 
         robot.motor_lift.setPower(gamepad1.right_stick_y/2);
 
-        if (gamepad1.a==true){
+        if (gamepad1.a){
             robot.motor_shovel.setPower(1);
         }
-        else if (gamepad1.b==true){
+        else if (gamepad1.b){
             robot.motor_shovel.setPower(-1);
         }
         else {
