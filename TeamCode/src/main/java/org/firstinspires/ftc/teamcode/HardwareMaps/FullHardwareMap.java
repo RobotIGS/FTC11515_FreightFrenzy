@@ -20,7 +20,7 @@ public class FullHardwareMap extends BaseHardwareMap {
 
         motor_front_left.setDirection(DcMotor.Direction.FORWARD);
         motor_front_right.setDirection(DcMotor.Direction.REVERSE);
-        motor_rear_left.setDirection(DcMotor.Direction.REVERSE);
+        motor_rear_left.setDirection(DcMotor.Direction.FORWARD);
         motor_rear_right.setDirection(DcMotor.Direction.REVERSE);
         motor_shovel.setDirection(DcMotorSimple.Direction.FORWARD);
         motor_lift.setDirection(DcMotorSimple.Direction.FORWARD);

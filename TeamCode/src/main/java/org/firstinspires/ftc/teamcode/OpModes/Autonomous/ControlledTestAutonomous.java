@@ -23,18 +23,22 @@ public class ControlledTestAutonomous extends BaseAutonomous {
         telemetry.update();
 
         // 10cm nach vorne
-        controlledDrive.drive(10, 0, 0.3);
+        controlledDrive.drive(50, 0, 0.3);
         telemetry.addData("pos1", 1);
         telemetry.update();
 
         // 10cm nach rechts
-        controlledDrive.drive(0, 10, 0.3);
+        controlledDrive.drive(0, 50, 0.3);
         telemetry.addData("pos1", 2);
         telemetry.update();
 
         // 10cm nach hinten & 10cm nach links
-        controlledDrive.drive(-10, -10, 0.3);
+        controlledDrive.drive(-50, 0, 0.3);
         telemetry.addData("pos1", 3);
+        telemetry.update();
+
+        controlledDrive.drive(0, -50, 0.3);
+        telemetry.addData("pos1", 4);
         telemetry.update();
     }
 }

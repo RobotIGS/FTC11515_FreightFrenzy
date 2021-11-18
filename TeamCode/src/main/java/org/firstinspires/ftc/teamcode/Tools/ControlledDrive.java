@@ -6,11 +6,10 @@ import org.firstinspires.ftc.teamcode.OpModes.Autonomous.BaseAutonomous;
 
 public class ControlledDrive {
     static final double COUNTS_PER_MOTOR_REV = 751.8;    // 223rpm
-    static final double COUNTS_PER_MOTOR_REV_RL = 384.5;    // 435rpm
+//    static final double COUNTS_PER_MOTOR_REV = 384.5;    // 435rpm
     static final double DRIVE_GEAR_REDUCTION = 1.0;      // This is < 1.0 if geared UP
     static final double WHEEL_DIAMETER_CMS = 10.0;     // For figuring circumference
     static final double COUNTS_PER_CM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_CMS * Math.PI);
-    static final double COUNTS_PER_CM_RL = (COUNTS_PER_MOTOR_REV_RL * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_CMS * Math.PI);
 
     BaseHardwareMap robot;
     BaseAutonomous autonomous;
@@ -30,9 +29,10 @@ public class ControlledDrive {
         double[] targets = {
                 robot.motor_front_left.getCurrentPosition() + wheelSpeeds[0] * (COUNTS_PER_CM * maxDistance),
                 robot.motor_front_right.getCurrentPosition() + wheelSpeeds[1] * (COUNTS_PER_CM * maxDistance),
-                robot.motor_rear_left.getCurrentPosition() + wheelSpeeds[2] * (COUNTS_PER_CM_RL * maxDistance),
+                robot.motor_rear_left.getCurrentPosition() + wheelSpeeds[2] * (COUNTS_PER_CM * maxDistance),
                 robot.motor_rear_right.getCurrentPosition() + wheelSpeeds[3] * (COUNTS_PER_CM * maxDistance)
         };
+
         // And pass to motor controller
         robot.motor_front_left.setTargetPosition((int) targets[0]);
         robot.motor_front_right.setTargetPosition((int) targets[1]);
