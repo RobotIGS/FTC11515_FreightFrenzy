@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
 import org.firstinspires.ftc.teamcode.Tools.ColorEnum;
+import org.firstinspires.ftc.teamcode.Tools.ColorTools;
 import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
 import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
 
@@ -41,7 +42,11 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void parkInWarehouse() {
-        // TODO:
+        omniWheel.setMotors(0.2,0,0);
+        while (!ColorTools.isWhite(robot.colorSensor_down) && opModeIsActive()){}
+        omniWheel.setMotors(0, 0, 0);
+
+        controlledDrive.drive(20,0,0.15);
     }
 
     public int driveToCake(){

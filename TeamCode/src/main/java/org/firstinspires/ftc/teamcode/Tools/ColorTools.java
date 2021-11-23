@@ -17,11 +17,11 @@ public class ColorTools {
     int total;
     float[] hsvNow;
     Queue<Integer> averageList;
-    final double SCALE_FACTOR = 255; // Umrechnungsfaktor
+    static final double SCALE_FACTOR = 255; // Umrechnungsfaktor
 
     boolean isColorChanged;
 
-    public boolean isColor(ColorEnum color_enum, ColorSensor colorSensor) {
+    public static boolean isColor(ColorEnum color_enum, ColorSensor colorSensor) {
         if (color_enum.equals(ColorEnum.Blue)) return isBlue(colorSensor);
         return isRed(colorSensor);
     }
@@ -33,7 +33,7 @@ public class ColorTools {
      * @param colorSensor is the color sensor we get our values from
      * @return it true or false
      */
-    public boolean isRed(ColorSensor colorSensor) {
+    public static boolean isRed(ColorSensor colorSensor) {
         float[] hsvValues = showHSV(colorSensor);
 
         if (hsvValues[0] >= 0 && hsvValues[0] <= 60 && hsvValues[1] >= 0.27) {
@@ -52,7 +52,7 @@ public class ColorTools {
      * @param colorSensor is the color sensor we get our values from
      * @return true or false
      */
-    public boolean isBlue(ColorSensor colorSensor) {
+    public static boolean isBlue(ColorSensor colorSensor) {
         float[] hsvValues = showHSV(colorSensor);
 
         if (hsvValues[0] >= 160 && hsvValues[0] <= 290  && hsvValues[1] >= 0.27 ) { //[0] 120, && hsvValues[1] >= 2 &&  && hsvValues[2] <= 7
@@ -62,10 +62,10 @@ public class ColorTools {
         return false;
     }
 
-    public boolean isWhite(ColorSensor colorSensor) {
+    public static boolean isWhite(ColorSensor colorSensor) {
         float[] hsvValues = showHSV(colorSensor);
 
-        if (hsvValues[1] < 0.1 && hsvValues[2] > 150) {
+        if (hsvValues[1] < 0.17 && hsvValues[2] > 100) {
             return true;
         }
 
@@ -109,7 +109,7 @@ public class ColorTools {
      * @param HSVvalues is the color sensor we get the rgb-values from
      * @return it returns hsv-values
      */
-    public float[] showHSV(ColorSensor HSVvalues) {
+    public static float[] showHSV(ColorSensor HSVvalues) {
         float[] hsv = new float[3];
 
         Color.RGBToHSV((int) (HSVvalues.red() * SCALE_FACTOR),

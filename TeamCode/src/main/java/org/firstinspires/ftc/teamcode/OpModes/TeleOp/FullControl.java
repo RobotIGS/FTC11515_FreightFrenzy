@@ -13,8 +13,8 @@ public class FullControl extends BaseTeleOp {
     @Override
     public void loop() {
         omniWheel.setMotors(
-                -gamepad1.left_stick_y/2,
-                gamepad1.left_stick_x/2,
+-                -gamepad1.left_stick_y,
+                gamepad1.left_stick_x,
                 (-gamepad1.left_trigger+gamepad1.right_trigger)/2
         );
 

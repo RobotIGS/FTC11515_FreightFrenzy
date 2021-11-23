@@ -15,6 +15,9 @@ public abstract class BaseHardwareMap {
     public DcMotor motor_shovel;
     public DcMotor motor_lift;
     public DistanceSensor distanceSensor_front_mid;
+    public DistanceSensor distanceSensor_carousel;
+    public ColorSensor colorSensor_down;
+
 
     public BaseHardwareMap(HardwareMap hwMap) {
         this.hwMap = hwMap;
