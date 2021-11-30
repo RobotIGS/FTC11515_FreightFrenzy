@@ -29,11 +29,9 @@ public class GyroCorectionTheo extends BaseTeleOp {
     private double P_Regler(double ek) { // ek = error; PID Regler ohne ID
         if (ek < 0) { ek = -ek; }
 
-        double v1 = ek/180 *0.6;
-        //double v2 = ek/180 *0.4 +0.01;
+        double v = ek/180 *0.6;
 
-        //return Math.max(v1);
-        return v1;
+        return v;
     }
 
     public void loop() {
@@ -49,7 +47,7 @@ public class GyroCorectionTheo extends BaseTeleOp {
         }
 
         telemetry.addData("valuesFirstAngle", angles.firstAngle);
-        telemetry.addData("angleRel", angleError);
+        telemetry.addData("angleError", angleError);
         telemetry.addData("vr", vr);
 
         vy = 0.3 * -gamepad1.left_stick_y;
@@ -57,10 +55,10 @@ public class GyroCorectionTheo extends BaseTeleOp {
         vr = P_Regler(angleError);
 
         if (gamepad1.left_trigger > 0) {
-            omniWheel.setMotors(vy, vx, -0.35);
+            omniWheel.setMotors(vy, vx, -gamepad1.left_trigger * 0.5);
             gyroPosition = angles.firstAngle;
         } else if (gamepad1.right_trigger > 0) {
-            omniWheel.setMotors(vy, vx, 0.35);
+            omniWheel.setMotors(vy, vx, gamepad1.right_trigger * 0.5);
             gyroPosition = angles.firstAngle;
         } else if (angleError > 0) {
             omniWheel.setMotors(vy, vx, -vr);
