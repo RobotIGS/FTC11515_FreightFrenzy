@@ -43,8 +43,5 @@ public class GyroHardwareMap {
         imu.initialize(parameters);
 
         Acceleration a = imu.getAcceleration();
-
-
-
     }
 }

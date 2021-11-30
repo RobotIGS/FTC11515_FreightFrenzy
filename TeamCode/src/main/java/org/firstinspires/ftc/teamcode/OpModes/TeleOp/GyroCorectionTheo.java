@@ -12,10 +12,11 @@ import org.firstinspires.ftc.teamcode.HardwareMaps.GyroHardwareMap;
 @TeleOp
 public class GyroCorectionTheo extends BaseTeleOp {
     double gyroPosition;
-    double angleRel;
+    double angleError;
     double vx;
     double vy;
     double vr;
+
     GyroHardwareMap hwgy;
 
     @Override
@@ -25,48 +26,46 @@ public class GyroCorectionTheo extends BaseTeleOp {
         hwgy.init(hardwareMap);
     }
 
-    private double f(double da) {
-        // todo: replace this (lambda)
-        // min is ca. 0.05 ( +da < 10)
-        // max is ca. 0.6 (+da < 180)
-        if (da < 0) {
-            da = -da;
-        }
-        da = (da/180)*0.6 + 0.05;
-        return da;
+    private double P_Regler(double ek) { // ek = error; PID Regler ohne ID
+        if (ek < 0) { ek = -ek; }
+
+        double v1 = ek/180 *0.6;
+        //double v2 = ek/180 *0.4 +0.01;
+
+        //return Math.max(v1);
+        return v1;
     }
 
     public void loop() {
         Orientation angles;
         angles = hwgy.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
-        gyroPosition += 1.0 * (gamepad1.left_trigger - gamepad1.right_trigger);
-        angleRel = gyroPosition - angles.firstAngle;
+        angleError = gyroPosition - angles.firstAngle;
 
-        if (angleRel > 180) {
-            angleRel -= 180;
-        } else if (angleRel < -180) {
-            angleRel += 180;
+        if (angleError > 180) {
+            angleError -= 180;
+        } else if (angleError < -180) {
+            angleError += 180;
         }
 
         telemetry.addData("valuesFirstAngle", angles.firstAngle);
-        telemetry.addData("angleRel", angleRel);
+        telemetry.addData("angleRel", angleError);
+        telemetry.addData("vr", vr);
 
         vy = 0.3 * -gamepad1.left_stick_y;
         vx = 0.3 * gamepad1.left_stick_x;
-        vr = f(angleRel);
+        vr = P_Regler(angleError);
 
-        if (gamepad1.y) {
+        if (gamepad1.left_trigger > 0) {
+            omniWheel.setMotors(vy, vx, -0.35);
             gyroPosition = angles.firstAngle;
-        }
-
-        if ((angleRel > -4) && (angleRel < 4)) {
-            omniWheel.setMotors(vy, vx, 0);
-        } else if (angleRel > 0) {
+        } else if (gamepad1.right_trigger > 0) {
+            omniWheel.setMotors(vy, vx, 0.35);
+            gyroPosition = angles.firstAngle;
+        } else if (angleError > 0) {
             omniWheel.setMotors(vy, vx, -vr);
-        } else if (angleRel < 0) {
+        } else if (angleError <= 0) {
             omniWheel.setMotors(vy, vx, vr);
         }
-        omniWheel.setMotors(vy,vx,0);
     }
 }
