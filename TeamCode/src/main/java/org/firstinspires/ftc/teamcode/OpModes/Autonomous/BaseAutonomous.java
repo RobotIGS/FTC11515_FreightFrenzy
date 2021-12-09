@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
+import org.firstinspires.ftc.teamcode.Tools.BarcodeEnum;
 import org.firstinspires.ftc.teamcode.Tools.ColorEnum;
 import org.firstinspires.ftc.teamcode.Tools.ColorTools;
 import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
@@ -78,11 +80,60 @@ public abstract class BaseAutonomous extends LinearOpMode {
         // TODO 
     }
 
-    public void placeElementAtPosition() {
+    public void placeElementAtPosition(BarcodeEnum barcodePosition) {
         // TODO
     }
 
-    public void detectPositionBarcode(){
-        // TODO
+    public DistanceSensor getBarcodeDistanceSensor() {
+        if (getAllianceColor() == ColorEnum.Blue) {
+            return robot.distanceSensor_right;
+        } else {
+            return robot.distanceSensor_left;
+        }
+    }
+
+    boolean isBarcodeStoneNear() {
+        return (getBarcodeDistanceSensor().getDistance(DistanceUnit.CM) < 100);
+    }
+
+    public BarcodeEnum detectBarcodePosition() {
+        boolean barcodePositionMid = false;
+        boolean barcodePositionRight = false;
+        boolean lastBarcodeCheck = false;
+
+        controlledDrive.drive(5,0,0.15);
+
+        controlledDrive.start(-15,0,0.15);
+        while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
+                robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
+                robot.motor_rear_right.isBusy())) {
+            if (isBarcodeStoneNear() && lastBarcodeCheck) {
+                barcodePositionMid = true;
+                break;
+            }
+            lastBarcodeCheck = isBarcodeStoneNear();
+        }
+        controlledDrive.stop();
+
+        lastBarcodeCheck = false;
+
+        if (!barcodePositionMid) {
+            controlledDrive.start(-15, 0, 0.15);
+            while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
+                    robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
+                    robot.motor_rear_right.isBusy())) {
+                if (isBarcodeStoneNear() && lastBarcodeCheck) {
+                    barcodePositionRight = true;
+                    break;
+                }
+                lastBarcodeCheck = isBarcodeStoneNear();
+            }
+
+            controlledDrive.stop();
+        }
+
+        if (barcodePositionMid) return BarcodeEnum.Mid;
+        else if (barcodePositionRight) return BarcodeEnum.Right;
+        else return BarcodeEnum.Left;
     }
 }

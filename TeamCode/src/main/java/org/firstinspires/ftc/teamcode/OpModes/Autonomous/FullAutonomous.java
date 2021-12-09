@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
 import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
+import org.firstinspires.ftc.teamcode.Tools.BarcodeEnum;
 
 public abstract class FullAutonomous extends BaseAutonomous {
     @Override
@@ -11,11 +12,11 @@ public abstract class FullAutonomous extends BaseAutonomous {
 
     @Override
     public void run() {
-        detectPositionBarcode();
+        BarcodeEnum barcodePosition = detectBarcodePosition();
         driveToCarousel();
         rotateCarousel();
         driveToShippingHub();
-        placeElementAtPosition();
+        placeElementAtPosition(barcodePosition);
         driveToWall();
         parkInWarehouse();
     }

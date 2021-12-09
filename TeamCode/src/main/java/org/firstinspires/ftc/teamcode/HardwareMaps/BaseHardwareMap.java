@@ -14,7 +14,10 @@ public abstract class BaseHardwareMap {
     public DcMotor motor_rear_left;
     public DcMotor motor_shovel;
     public DcMotor motor_lift;
+    public DcMotor motor_carousel;
     public DistanceSensor distanceSensor_front_mid;
+    public DistanceSensor distanceSensor_right;
+    public DistanceSensor distanceSensor_left;
     public DistanceSensor distanceSensor_carousel;
     public ColorSensor colorSensor_down;
 

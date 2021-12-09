@@ -19,8 +19,11 @@ public class FullHardwareMap extends BaseHardwareMap {
         motor_rear_right = hwMap.get(DcMotor.class, "hub1_motorport1");
         motor_shovel = hwMap.get(DcMotor.class, "hub2_motorport1");
         motor_lift = hwMap.get(DcMotor.class, "hub2_motorport0");
+        motor_carousel = hwMap.get(DcMotor.class, "hub2_motorport2");
 
         distanceSensor_front_mid = hwMap.get(DistanceSensor.class, "hub1_i2c2");
+        distanceSensor_right = hwMap.get(DistanceSensor.class, "hub2_i2c1");
+        distanceSensor_left = hwMap.get(DistanceSensor.class, "hub2_i2c2");
         distanceSensor_carousel = hwMap.get(DistanceSensor.class, "hub1_i2c3");
         colorSensor_down = hwMap.get(ColorSensor.class, "hub1_i2c1");
 

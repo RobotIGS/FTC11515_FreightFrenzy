@@ -20,6 +20,14 @@ public class ControlledDrive {
     }
 
     public void drive(double distanceForward, double distanceSideways, double speed) {
+        start(distanceForward, distanceSideways, speed);
+        while (autonomous.opModeIsActive() && (robot.motor_front_left.isBusy() ||
+                robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
+                robot.motor_rear_right.isBusy())) {}
+        stop();
+    }
+
+    public void start(double distanceForward, double distanceSideways, double speed) {
         double maxDistance = Math.max(Math.abs(distanceForward), Math.abs(distanceSideways));
 
         double[] wheelSpeeds = OmniWheel.calculateWheelSpeeds(distanceForward / maxDistance,
@@ -50,11 +58,9 @@ public class ControlledDrive {
         robot.motor_front_right.setPower(wheelSpeeds[1] * speed);
         robot.motor_rear_left.setPower(wheelSpeeds[2] * speed);
         robot.motor_rear_right.setPower(wheelSpeeds[3] * speed);
+    }
 
-        while (autonomous.opModeIsActive() && (robot.motor_front_left.isBusy() || robot.motor_front_right.isBusy() ||
-                robot.motor_rear_left.isBusy() || robot.motor_rear_right.isBusy())) {
-        }
-
+    public void stop() {
         // Stop all motion;
         robot.motor_front_left.setPower(0);
         robot.motor_front_right.setPower(0);
