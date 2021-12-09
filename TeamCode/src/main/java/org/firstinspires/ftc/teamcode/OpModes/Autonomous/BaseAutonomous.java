@@ -11,6 +11,8 @@ import org.firstinspires.ftc.teamcode.Tools.ColorTools;
 import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
 import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
 
+import java.util.Date;
+
 public abstract class BaseAutonomous extends LinearOpMode {
     BaseHardwareMap robot;
     OmniWheel omniWheel;
@@ -34,55 +36,6 @@ public abstract class BaseAutonomous extends LinearOpMode {
     public abstract ColorEnum getAllianceColor();
 
     public abstract void run();
-
-    public void driveToCarousel() {
-        // TODO
-    }
-
-    public void rotateCarousel() {
-        // TODO
-    }
-
-    public void parkInWarehouse() {
-        omniWheel.setMotors(0.2,0,0);
-        while (!ColorTools.isWhite(robot.colorSensor_down) && opModeIsActive()){}
-        omniWheel.setMotors(0, 0, 0);
-
-        controlledDrive.drive(20,0,0.15);
-    }
-
-    public int driveToCake(){
-        int level = 1;
-
-        // TODO: Drive forward with encoders
-
-        if(robot.distanceSensor_front_mid.getDistance(DistanceUnit.CM)<=10) { //THIS VALUE NEEDS TO BE TESTED!! (Paul.U)
-            level = 2;
-        }
-
-        // TODO: Drive sidewards with encoders
-
-        if(robot.distanceSensor_front_mid.getDistance(DistanceUnit.CM)<=10) { //THIS VALUE NEEDS TO BE TESTED!! (Paul.U)
-            level = 3;
-        }
-        return level;
-    }
-
-    public void driveToShippingHub() {
-        // TODO
-    }
-
-    public void placeElementAtBottom() {
-        // TODO
-    }
-
-    public void driveToWall() {
-        // TODO 
-    }
-
-    public void placeElementAtPosition(BarcodeEnum barcodePosition) {
-        // TODO
-    }
 
     public DistanceSensor getBarcodeDistanceSensor() {
         if (getAllianceColor() == ColorEnum.Blue) {
@@ -135,5 +88,58 @@ public abstract class BaseAutonomous extends LinearOpMode {
         if (barcodePositionMid) return BarcodeEnum.Mid;
         else if (barcodePositionRight) return BarcodeEnum.Right;
         else return BarcodeEnum.Left;
+    }
+
+    public void driveToCarousel() {
+        omniWheel.setMotors(-0.15,0,0);
+        while (!(robot.distanceSensor_carousel.getDistance(DistanceUnit.CM) < 10) && opModeIsActive()){}
+        omniWheel.setMotors(0, 0, 0);
+    }
+
+    public void rotateCarousel() {
+        int direction = 1;
+
+        if (getAllianceColor() == ColorEnum.Blue) {
+            direction = -1;
+        }
+
+        robot.motor_carousel.setPower(0.5 * direction);
+
+        long startTime = (new Date()).getTime();
+        while (opModeIsActive()) {
+            Date now = new Date();
+            telemetry.addData("1", startTime + 1000);
+            telemetry.addData("2", now.getTime());
+            telemetry.update();
+            if (startTime + 1000 < now.getTime()) {
+                break;
+            }
+        } // wait a second
+
+        robot.motor_carousel.setPower(0);
+    }
+
+    public void driveToShippingHub() {
+        // TODO
+    }
+
+    public void placeElementAtBottom() {
+        placeElementAtPosition(BarcodeEnum.Right);
+    }
+
+    public void placeElementAtPosition(BarcodeEnum barcodePosition) {
+        // TODO
+    }
+
+    public void driveToWall() {
+        // TODO
+    }
+
+    public void parkInWarehouse() {
+        omniWheel.setMotors(0.2,0,0);
+        while (!ColorTools.isWhite(robot.colorSensor_down) && opModeIsActive()){}
+        omniWheel.setMotors(0, 0, 0);
+
+        controlledDrive.drive(20,0,0.15);
     }
 }
