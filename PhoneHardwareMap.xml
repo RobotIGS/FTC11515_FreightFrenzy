@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>
+<Robot type="FirstInspires-FTC">
+    <LynxUsbDevice name="Expansion Hub Portal" serialNumber="(embedded)" parentModuleAddress="173">
+        <LynxModule name="Control Hub" port="173">
+            <Matrix12vMotor name="hub1_motorport0" port="0" />
+            <Matrix12vMotor name="hub1_motorport1" port="1" />
+            <Matrix12vMotor name="hub1_motorport2" port="2" />
+            <Matrix12vMotor name="hub1_motorport3" port="3" />
+            <Servo name="hub1_servoport0" port="0" />
+            <Servo name="hub1_servoport1" port="1" />
+            <Servo name="hub1_servoport2" port="2" />
+            <Servo name="hub1_servoport3" port="3" />
+            <Servo name="hub1_servoport4" port="4" />
+            <Servo name="hub1_servoport5" port="5" />
+            <DigitalDevice name="hub1_digitalport0" port="0" />
+            <DigitalDevice name="hub1_digitalport1" port="1" />
+            <DigitalDevice name="hub1_digitalport2" port="2" />
+            <DigitalDevice name="hub1_digitalport3" port="3" />
+            <LynxEmbeddedIMU name="imu" port="0" bus="0" />
+            <LynxColorSensor name="hub1_i2c1" port="0" bus="1" />
+            <LynxColorSensor name="hub1_i2c2" port="0" bus="2" />
+            <LynxColorSensor name="hub1_i2c3" port="0" bus="3" />
+        </LynxModule>
+        <LynxModule name="Expansion Hub 2" port="2">
+            <Matrix12vMotor name="hub2_motorport0" port="0" />
+            <Matrix12vMotor name="hub2_motorport1" port="1" />
+            <Matrix12vMotor name="hub2_motorport2" port="2" />
+            <Matrix12vMotor name="hub2_motorport3" port="3" />
+            <Servo name="hub2_servoport0" port="0" />
+            <Servo name="hub2_servoport1" port="1" />
+            <Servo name="hub2_servoport2" port="2" />
+            <Servo name="hub2_servoport3" port="3" />
+            <Servo name="hub2_servoport4" port="4" />
+            <Servo name="hub2_servoport5" port="5" />
+            <DigitalDevice name="hub2_digitalport0" port="0" />
+            <DigitalDevice name="hub2_digitalport1" port="1" />
+            <DigitalDevice name="hub2_digitalport2" port="2" />
+            <DigitalDevice name="hub2_digitalport3" port="3" />
+            <LynxEmbeddedIMU name="hub2_imu" port="0" bus="0" />
+            <REV_VL53L0X_RANGE_SENSOR name="hub2_i2c1" port="0" bus="1" />
+            <REV_VL53L0X_RANGE_SENSOR name="hub2_i2c2" port="0" bus="2" />
+        </LynxModule>
+    </LynxUsbDevice>
+</Robot>

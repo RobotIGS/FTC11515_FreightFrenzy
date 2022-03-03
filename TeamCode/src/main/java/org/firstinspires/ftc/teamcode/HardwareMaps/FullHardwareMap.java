@@ -38,6 +38,7 @@ public class FullHardwareMap extends BaseHardwareMap {
         motor_front_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motor_rear_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motor_rear_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        motor_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         motor_lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }

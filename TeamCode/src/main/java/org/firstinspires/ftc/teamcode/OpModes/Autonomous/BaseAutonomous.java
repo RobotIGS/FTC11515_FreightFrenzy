@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
@@ -98,6 +99,8 @@ public abstract class BaseAutonomous extends LinearOpMode {
                 if (isBlue) return PositionEnum.Bottom;
                 return PositionEnum.Top;
         }
+
+        return PositionEnum.Bottom;
     }
 
     public void driveToCarousel() {
@@ -118,9 +121,6 @@ public abstract class BaseAutonomous extends LinearOpMode {
         long startTime = (new Date()).getTime();
         while (opModeIsActive()) {
             Date now = new Date();
-            telemetry.addData("1", startTime + 1000);
-            telemetry.addData("2", now.getTime());
-            telemetry.update();
             if (startTime + 1000 < now.getTime()) {
                 break;
             }
@@ -130,7 +130,11 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void driveToShippingHub() {
-        // TODO
+        int dirMul = (getAllianceColor() == ColorEnum.Blue) ? 1 : -1;
+
+        controlledDrive.drive(65,0, 0.25);
+
+        controlledDrive.drive(0, 110*dirMul, 0.15);
     }
 
     public void placeElementAtBottom() {
@@ -138,7 +142,41 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void placeElementAtPosition(PositionEnum position) {
-        // TODO
+        int encoderAmount = 0;
+        switch (position) {
+            case Bottom:
+                encoderAmount = -600;
+                break;
+            case Middle:
+                encoderAmount = -1000;
+                break;
+            case Top:
+                encoderAmount = -1500;
+                break;
+        }
+        int startPos = robot.motor_lift.getCurrentPosition();
+        robot.motor_lift.setTargetPosition(startPos + encoderAmount);
+        robot.motor_lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.motor_lift.setPower(0.25);
+
+        while (robot.motor_lift.isBusy() && opModeIsActive()) {}
+
+        robot.motor_shovel.setPower(-1);
+        long startTime = (new Date()).getTime();
+        while (opModeIsActive()) {
+            Date now = new Date();
+            if (startTime + 500 < now.getTime()) {
+                break;
+            }
+        } // wait half a second
+        robot.motor_shovel.setPower(0);
+
+        robot.motor_lift.setTargetPosition(startPos);
+        robot.motor_lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        robot.motor_lift.setPower(0.25);
+        while (robot.motor_lift.isBusy() && opModeIsActive()) {}
+        robot.motor_lift.setPower(0);
+        robot.motor_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void driveToWall() {
