@@ -5,11 +5,7 @@ import com.qualcomm.robotcore.hardware.DistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
-import org.firstinspires.ftc.teamcode.Tools.BarcodeEnum;
-import org.firstinspires.ftc.teamcode.Tools.ColorEnum;
-import org.firstinspires.ftc.teamcode.Tools.ColorTools;
-import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
-import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
+import org.firstinspires.ftc.teamcode.Tools.*;
 
 import java.util.Date;
 
@@ -49,9 +45,9 @@ public abstract class BaseAutonomous extends LinearOpMode {
         return (getBarcodeDistanceSensor().getDistance(DistanceUnit.CM) < 100);
     }
 
-    public BarcodeEnum detectBarcodePosition() {
+    public PositionEnum detectBarcodePosition() {
         boolean barcodePositionMid = false;
-        boolean barcodePositionRight = false;
+        boolean barcodePositionFront = false;
         boolean lastBarcodeCheck = false;
 
         controlledDrive.drive(5,0,0.15);
@@ -76,7 +72,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
                     robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
                     robot.motor_rear_right.isBusy())) {
                 if (isBarcodeStoneNear() && lastBarcodeCheck) {
-                    barcodePositionRight = true;
+                    barcodePositionFront = true;
                     break;
                 }
                 lastBarcodeCheck = isBarcodeStoneNear();
@@ -85,9 +81,23 @@ public abstract class BaseAutonomous extends LinearOpMode {
             controlledDrive.stop();
         }
 
-        if (barcodePositionMid) return BarcodeEnum.Mid;
-        else if (barcodePositionRight) return BarcodeEnum.Right;
-        else return BarcodeEnum.Left;
+        BarcodeEnum barcodeState;
+
+        if (barcodePositionMid) barcodeState = BarcodeEnum.Mid;
+        else if (barcodePositionFront) barcodeState = BarcodeEnum.Front;
+        else barcodeState = BarcodeEnum.Back;
+
+        boolean isBlue = getAllianceColor() == ColorEnum.Blue;
+        switch (barcodeState) {
+            case Back:
+                if (isBlue) return PositionEnum.Top;
+                return PositionEnum.Bottom;
+            case Mid:
+                return PositionEnum.Middle;
+            case Front:
+                if (isBlue) return PositionEnum.Bottom;
+                return PositionEnum.Top;
+        }
     }
 
     public void driveToCarousel() {
@@ -124,10 +134,10 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void placeElementAtBottom() {
-        placeElementAtPosition(BarcodeEnum.Right);
+        placeElementAtPosition(PositionEnum.Bottom);
     }
 
-    public void placeElementAtPosition(BarcodeEnum barcodePosition) {
+    public void placeElementAtPosition(PositionEnum position) {
         // TODO
     }
 

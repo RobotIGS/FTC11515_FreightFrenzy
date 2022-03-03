@@ -1,7 +1,7 @@
 package org.firstinspires.ftc.teamcode.Tools;
 
 public enum BarcodeEnum {
-    Left,
+    Back,
     Mid,
-    Right
+    Front
 }
