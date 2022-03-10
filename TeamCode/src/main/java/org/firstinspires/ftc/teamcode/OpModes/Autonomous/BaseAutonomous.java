@@ -104,9 +104,19 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void driveToCarousel() {
-        omniWheel.setMotors(-0.15,0,0);
-        while (!(robot.distanceSensor_carousel.getDistance(DistanceUnit.CM) < 10) && opModeIsActive()){}
+        omniWheel.setMotors(-0.25,0,0);
+        while (!(robot.distanceSensor_carousel.getDistance(DistanceUnit.CM) < 15) && opModeIsActive()){}
         omniWheel.setMotors(0, 0, 0);
+
+        omniWheel.setMotors(-0.15,0,0.15);
+        long startTime = (new Date()).getTime();
+        while (opModeIsActive()) {
+            Date now = new Date();
+            if (startTime + 100 < now.getTime()) {
+                break;
+            }
+        } // wait a moment
+        omniWheel.setMotors(0, 0, 0.001);
     }
 
     public void rotateCarousel() {
@@ -116,12 +126,12 @@ public abstract class BaseAutonomous extends LinearOpMode {
             direction = -1;
         }
 
-        robot.motor_carousel.setPower(0.5 * direction);
+        robot.motor_carousel.setPower(0.55 * direction);
 
         long startTime = (new Date()).getTime();
         while (opModeIsActive()) {
             Date now = new Date();
-            if (startTime + 1000 < now.getTime()) {
+            if (startTime + 3000 < now.getTime()) {
                 break;
             }
         } // wait a second
@@ -132,13 +142,10 @@ public abstract class BaseAutonomous extends LinearOpMode {
     public void driveToShippingHub() {
         int dirMul = (getAllianceColor() == ColorEnum.Blue) ? 1 : -1;
 
-        controlledDrive.drive(65,0, 0.25);
+        // just orient at wall
+        controlledDrive.drive(25,0, 0.3);
 
-        controlledDrive.drive(0, 110*dirMul, 0.15);
-    }
-
-    public void placeElementAtBottom() {
-        placeElementAtPosition(PositionEnum.Bottom);
+        controlledDrive.drive(25, 130*dirMul, 0.18);
     }
 
     public void placeElementAtPosition(PositionEnum position) {
@@ -157,11 +164,11 @@ public abstract class BaseAutonomous extends LinearOpMode {
         int startPos = robot.motor_lift.getCurrentPosition();
         robot.motor_lift.setTargetPosition(startPos + encoderAmount);
         robot.motor_lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.motor_lift.setPower(0.25);
+        robot.motor_lift.setPower(0.5);
 
         while (robot.motor_lift.isBusy() && opModeIsActive()) {}
 
-        robot.motor_shovel.setPower(-1);
+        robot.motor_shovel.setPower(-0.75);
         long startTime = (new Date()).getTime();
         while (opModeIsActive()) {
             Date now = new Date();
@@ -173,21 +180,23 @@ public abstract class BaseAutonomous extends LinearOpMode {
 
         robot.motor_lift.setTargetPosition(startPos);
         robot.motor_lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.motor_lift.setPower(0.25);
+        robot.motor_lift.setPower(0.5);
         while (robot.motor_lift.isBusy() && opModeIsActive()) {}
         robot.motor_lift.setPower(0);
         robot.motor_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void driveToWall() {
-        // TODO
+        int dirMul = (getAllianceColor() == ColorEnum.Blue) ? 1 : -1;
+
+        controlledDrive.drive(70, -140*dirMul, 0.25);
     }
 
     public void parkInWarehouse() {
-        omniWheel.setMotors(0.2,0,0);
+        omniWheel.setMotors(0.35,0,0);
         while (!ColorTools.isWhite(robot.colorSensor_down) && opModeIsActive()){}
         omniWheel.setMotors(0, 0, 0);
 
-        controlledDrive.drive(20,0,0.15);
+        controlledDrive.drive(20,0,0.3);
     }
 }

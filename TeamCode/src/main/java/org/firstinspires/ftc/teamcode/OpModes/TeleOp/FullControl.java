@@ -16,7 +16,7 @@ public class FullControl extends BaseTeleOp {
         omniWheel.setMotors(
                 -gamepad1.left_stick_y,
                 gamepad1.left_stick_x,
-                (-gamepad1.left_trigger+gamepad1.right_trigger)/2
+                (gamepad1.right_stick_x)/2
         );
 
         robot.motor_lift.setPower(gamepad1.right_stick_y/2);

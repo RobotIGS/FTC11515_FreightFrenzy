@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
 import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
+import org.firstinspires.ftc.teamcode.Tools.PositionEnum;
 
 public abstract class ExtendedAutonomous extends BaseAutonomous {
     @Override
@@ -14,7 +15,7 @@ public abstract class ExtendedAutonomous extends BaseAutonomous {
         driveToCarousel();
         rotateCarousel();
         driveToShippingHub();
-        placeElementAtBottom();
+        placeElementAtPosition(PositionEnum.Bottom);
         driveToWall();
         parkInWarehouse();
     }

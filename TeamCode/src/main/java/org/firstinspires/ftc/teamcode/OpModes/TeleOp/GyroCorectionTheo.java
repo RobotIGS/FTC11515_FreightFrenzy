@@ -49,6 +49,7 @@ public class GyroCorectionTheo extends BaseTeleOp {
         telemetry.addData("valuesFirstAngle", angles.firstAngle);
         telemetry.addData("angleError", angleError);
         telemetry.addData("vr", vr);
+        telemetry.update();
 
         vy = 0.3 * -gamepad1.left_stick_y;
         vx = 0.3 * gamepad1.left_stick_x;
