@@ -6,9 +6,11 @@ import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
 
 @TeleOp
 public class FullControl extends BaseTeleOp {
+    boolean intake;
     @Override
     public void initialize() {
         robot = new FullHardwareMap(hardwareMap);
+        intake = false;
     }
 
     @Override
@@ -22,13 +24,27 @@ public class FullControl extends BaseTeleOp {
         robot.motor_lift.setPower(gamepad1.right_stick_y/2);
 
         if (gamepad1.a){
-            robot.motor_shovel.setPower(1);
+            intake = !intake;
+            robot.motor_shovel.setPower(0);
         }
-        else if (gamepad1.b){
-            robot.motor_shovel.setPower(-1);
+        if (gamepad1.b){
+            robot.motor_shovel.setPower(-0.5);
+            intake = false;
+        }
+        else if (intake) {
+            robot.motor_shovel.setPower(1);
         }
         else {
             robot.motor_shovel.setPower(0);
+        }
+
+        if (gamepad1.x) {
+            robot.motor_carousel.setPower(0.5);
+        }
+        else if (gamepad1.y) {
+            robot.motor_carousel.setPower(-0.5);
+        } else {
+            robot.motor_carousel.setPower(0);
         }
     }
 }

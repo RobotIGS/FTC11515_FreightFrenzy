@@ -16,7 +16,8 @@ public abstract class ExtendedAutonomous extends BaseAutonomous {
         rotateCarousel();
         driveToShippingHub();
         placeElementAtPosition(PositionEnum.Bottom);
-        driveToWall();
-        parkInWarehouse();
+        // not working !!!
+        //driveToWall();
+        //parkInWarehouse();
     }
 }
