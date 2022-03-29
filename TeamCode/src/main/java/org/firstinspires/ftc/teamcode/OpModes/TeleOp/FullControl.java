@@ -16,12 +16,12 @@ public class FullControl extends BaseTeleOp {
     @Override
     public void loop() {
         omniWheel.setMotors(
-                -gamepad1.left_stick_y,
-                gamepad1.left_stick_x,
-                (gamepad1.right_stick_x)/2
+                -gamepad1.left_stick_y * 0.7,
+                gamepad1.left_stick_x * 0.7,
+                gamepad1.right_stick_x * 0.2
         );
 
-        robot.motor_lift.setPower(gamepad1.right_stick_y/2);
+        robot.motor_lift.setPower(-gamepad1.right_stick_y * 0.4);
 
         if (gamepad1.a){
             intake = !intake;

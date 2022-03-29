@@ -37,4 +37,3 @@ public class OmniWheel {
         this.calculateWheelSpeeds(forwardVelocity, sidewardsVelocity, rotationVelocity).setMotors(robot);
     }
 }
-
