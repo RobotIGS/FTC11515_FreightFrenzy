@@ -19,6 +19,8 @@ import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
 import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
 import org.firstinspires.ftc.teamcode.Tools.PositionEnum;
 
+import sun.awt.www.content.audio.wav;
+
 import java.util.Date;
 
 public abstract class BaseAutonomous extends LinearOpMode {
@@ -70,33 +72,63 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void detectBarcodePosition() {
-        controlledDrive.start(-20, 0, 0.05);
+        int counter = 0;
+        int n_counters = 5; // counters to detect the duck / cube / .. on the barcode
+
+        // middle barcode mark
+        controlledDrive.start(-18, 0, 0.2);
         while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
                 robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
                 robot.motor_rear_right.isBusy())) {
             if (isBarcodeStoneNear()) {
-                barcodePosition = PositionEnum.Middle;
+                counter ++;
             }
+        }
+
+        // check if the sensor found the duck / .. more than n_counters times
+        if (counter > n_counters) {
+            barcodePosition = PositionEnum.Middle;
         }
         controlledDrive.stop();
 
+        // skip if the duck / cube / .. was already detected
         if (barcodePosition == PositionEnum.unknown) {
-            controlledDrive.start(-20, 0, 0.05);
+            counter = 0;
+
+            // the barcode marker next to the wall
+            controlledDrive.start(-18, 0, 0.2);
             while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
                     robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
                     robot.motor_rear_right.isBusy())) {
                 if (isBarcodeStoneNear()) {
-                    barcodePosition = PositionEnum.Bottom;
+                    counter ++;
                 }
             }
             controlledDrive.stop();
-        }
 
-        if (barcodePosition == PositionEnum.unknown) {
+            // check if the sensor found the duck / .. more than n_counters times
+            if (counter > n_counters) {
+                barcodePosition = PositionEnum.Bottom;
+            }
+        }
+        
+        // flip the psitions if getAllianceColor is red
+        if (getAllianceColor() == colorEnum.Red && barcodePosition == PositionEnum.Bottom) {
             barcodePosition = PositionEnum.Top;
         }
 
+        // handle missing barcode marker
+        if (barcodePosition == PositionEnum.unknown) {
+            if (getAllianceColor() == ColorEnum.Red) {
+                barcodePosition = PositionEnum.Bottom;
+            } else {
+                barcodePosition = PositionEnum.Top;
+            }
+        }
+
+        // DEBUG:
         telemetry.addData("pos", barcodePosition);
+        telemetry.addData("counter", counter);
         telemetry.update();
     }
 
