@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
+import com.sun.tools.javac.util.Position;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -23,6 +24,7 @@ import java.util.Date;
 public abstract class BaseAutonomous extends LinearOpMode {
     double gyroPosition;
     int liftStartPos;
+    PositionEnum barcodePosition;
     BaseHardwareMap robot;
     GyroHardwareMap hwgy;
     OmniWheel omniWheel;
@@ -43,6 +45,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
         hwgy.init(hardwareMap);
         gyroPosition = hwgy.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         liftStartPos = robot.motor_lift.getCurrentPosition();
+        barcodePosition = PositionEnum.unknown;
     }
 
     public abstract BaseHardwareMap initializeHardwareMap();
@@ -60,67 +63,45 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     boolean isBarcodeStoneNear() {
-        return (getBarcodeDistanceSensor().getDistance(DistanceUnit.CM) < 100);
+        double dis = getBarcodeDistanceSensor().getDistance(DistanceUnit.CM);
+        telemetry.addData("dis", dis);
+        telemetry.update();
+        return (dis < 100 && dis > 45);
     }
 
-    public PositionEnum detectBarcodePosition() {
-        boolean barcodePositionMid = false;
-        boolean barcodePositionFront = false;
-        boolean lastBarcodeCheck = false;
-
-        controlledDrive.drive(5, 0, 0.15);
-
-        controlledDrive.start(-15, 0, 0.15);
+    public void detectBarcodePosition() {
+        controlledDrive.start(-20, 0, 0.05);
         while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
                 robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
                 robot.motor_rear_right.isBusy())) {
-            if (isBarcodeStoneNear() && lastBarcodeCheck) {
-                barcodePositionMid = true;
-                break;
+            if (isBarcodeStoneNear()) {
+                barcodePosition = PositionEnum.Middle;
             }
-            lastBarcodeCheck = isBarcodeStoneNear();
         }
         controlledDrive.stop();
 
-        lastBarcodeCheck = false;
-
-        if (!barcodePositionMid) {
-            controlledDrive.start(-15, 0, 0.15);
+        if (barcodePosition == PositionEnum.unknown) {
+            controlledDrive.start(-20, 0, 0.05);
             while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
                     robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
                     robot.motor_rear_right.isBusy())) {
-                if (isBarcodeStoneNear() && lastBarcodeCheck) {
-                    barcodePositionFront = true;
-                    break;
+                if (isBarcodeStoneNear()) {
+                    barcodePosition = PositionEnum.Bottom;
                 }
-                lastBarcodeCheck = isBarcodeStoneNear();
             }
-
             controlledDrive.stop();
         }
 
-        BarcodeEnum barcodeState;
-
-        if (barcodePositionMid) barcodeState = BarcodeEnum.Mid;
-        else if (barcodePositionFront) barcodeState = BarcodeEnum.Front;
-        else barcodeState = BarcodeEnum.Back;
-
-        boolean isBlue = getAllianceColor() == ColorEnum.Blue;
-        switch (barcodeState) {
-            case Back:
-                if (isBlue) return PositionEnum.Top;
-                return PositionEnum.Bottom;
-            case Mid:
-                return PositionEnum.Middle;
-            case Front:
-                if (isBlue) return PositionEnum.Bottom;
-                return PositionEnum.Top;
+        if (barcodePosition == PositionEnum.unknown) {
+            barcodePosition = PositionEnum.Top;
         }
 
-        return PositionEnum.Bottom;
+        telemetry.addData("pos", barcodePosition);
+        telemetry.update();
     }
 
     public void driveToCarousel() {
+        // detect barcode
         omniWheel.setMotors(-0.15, 0, 0); // changed 025 to 015
         while (!(robot.distanceSensor_carousel.getDistance(DistanceUnit.CM) < 20) && opModeIsActive()) {
         } // 15 to 20
@@ -188,7 +169,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
         omniWheel.setMotors(0, 0, 0);
 
         // get a clear view (move the lift out of the way from the dis sensor)
-        robot.motor_lift.setTargetPosition(liftStartPos + 700);
+        robot.motor_lift.setTargetPosition(liftStartPos + 800);
         robot.motor_lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.motor_lift.setPower(0.2);
         while (robot.motor_lift.isBusy() && opModeIsActive()) {
@@ -204,13 +185,13 @@ public abstract class BaseAutonomous extends LinearOpMode {
         int encoderAmount = 0;
         switch (position) {
             case Bottom:
-                encoderAmount = 700;
+                encoderAmount = 800;
                 break;
             case Middle:
-                encoderAmount = 1000;
+                encoderAmount = 1600;
                 break;
             case Top:
-                encoderAmount = 1500;
+                encoderAmount = 2600;
                 break;
         }
         robot.motor_lift.setTargetPosition(liftStartPos + encoderAmount);
@@ -246,7 +227,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
     public void parkInWarehouse() {
         int dirMul = (getAllianceColor() == ColorEnum.Blue) ? 1 : -1;
 
-        omniWheel.setMotors(0, -0.2 * dirMul, 0);
+        omniWheel.setMotors(-0.06, -0.2 * dirMul, 0);
         while (!ColorTools.isWhite(robot.colorSensor_down) && opModeIsActive()) {
         }
         omniWheel.setMotors(0, 0, 0);

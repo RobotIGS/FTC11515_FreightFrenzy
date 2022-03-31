@@ -13,11 +13,10 @@ public abstract class FullAutonomous extends BaseAutonomous {
 
     @Override
     public void run() {
-        PositionEnum position = detectBarcodePosition();
-        driveToCarousel();
+        // driveToCarousel(); dis sens right not worḱing
         rotateCarousel();
         driveToShippingHub();
-        placeElementAtPosition(position);
+        placeElementAtPosition(barcodePosition);
         driveToWall();
         parkInWarehouse();
     }

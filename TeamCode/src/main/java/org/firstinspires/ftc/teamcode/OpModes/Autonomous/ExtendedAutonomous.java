@@ -12,12 +12,14 @@ public abstract class ExtendedAutonomous extends BaseAutonomous {
 
     @Override
     public void run() {
+        //barcodePosition = PositionEnum.Top;
+        getBarcodePosition();
         driveToCarousel();
         rotateCarousel();
         driveToShippingHub();
-        placeElementAtPosition(PositionEnum.Bottom);
+        placeElementAtPosition(barcodePosition);
         driveToWall();
         // not working !!!
-        // parkInWarehouse();
+        parkInWarehouse();
     }
 }

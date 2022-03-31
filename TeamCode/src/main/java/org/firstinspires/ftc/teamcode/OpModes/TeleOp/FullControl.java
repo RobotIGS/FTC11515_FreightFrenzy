@@ -7,10 +7,13 @@ import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
 @TeleOp
 public class FullControl extends BaseTeleOp {
     boolean intake;
+    int liftStartPos;
+
     @Override
     public void initialize() {
         robot = new FullHardwareMap(hardwareMap);
         intake = false;
+        liftStartPos = robot.motor_lift.getCurrentPosition();
     }
 
     @Override
@@ -21,7 +24,22 @@ public class FullControl extends BaseTeleOp {
                 gamepad1.right_stick_x * 0.2
         );
 
-        robot.motor_lift.setPower(-gamepad1.right_stick_y * 0.4);
+        if (robot.motor_lift.getCurrentPosition() - liftStartPos > 0) {
+            if (gamepad1.right_stick_y > 0) {
+                robot.motor_lift.setPower(-gamepad1.right_stick_y * 0.4);
+            }
+        }
+        else {
+            robot.motor_lift.setPower(-0.1);
+        }
+        if (robot.motor_lift.getCurrentPosition() - liftStartPos < 2700) {
+            if (gamepad1.right_stick_y < 0) {
+                robot.motor_lift.setPower(-gamepad1.right_stick_y * 0.4);
+            }
+        }
+        else {
+            robot.motor_lift.setPower(0.1);
+        }
 
         if (gamepad1.a){
             intake = !intake;
@@ -46,5 +64,8 @@ public class FullControl extends BaseTeleOp {
         } else {
             robot.motor_carousel.setPower(0);
         }
+
+        telemetry.addData("lift", liftStartPos - robot.motor_lift.getCurrentPosition());
+        telemetry.update();
     }
 }
