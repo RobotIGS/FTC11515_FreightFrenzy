@@ -27,6 +27,40 @@ public class ControlledDrive {
         stop();
     }
 
+    public void drive_with_acc(double distanceForward, double distanceSideways, double speed, double acc) {
+        start(distanceForward, distanceSideways, speed);
+        while (autonomous.opModeIsActive()) {
+            if (test_acc(acc)) {
+                break;
+            }
+        }
+        stop();
+    }
+
+    public boolean test_acc(double acc) {
+        double count=0;
+        acc = Math.abs(acc);
+
+        if (Math.abs(robot.motor_front_left.getTargetPosition() - robot.motor_front_left.getCurrentPosition()) < acc) {
+            count ++;
+        }
+        if (Math.abs(robot.motor_front_right.getTargetPosition() - robot.motor_front_right.getCurrentPosition()) < acc) {
+            count ++;
+        }
+        if (Math.abs(robot.motor_rear_left.getTargetPosition() - robot.motor_rear_left.getCurrentPosition()) < acc) {
+            count ++;
+        }
+        if (Math.abs(robot.motor_rear_right.getTargetPosition() - robot.motor_rear_right.getCurrentPosition()) < acc) {
+            count ++;
+        } 
+        
+        if (count > 2) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     public void start(double distanceForward, double distanceSideways, double speed) {
         double maxDistance = Math.max(Math.abs(distanceForward), Math.abs(distanceSideways));
 

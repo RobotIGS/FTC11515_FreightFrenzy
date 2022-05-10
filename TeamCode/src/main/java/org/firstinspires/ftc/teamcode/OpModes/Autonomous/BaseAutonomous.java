@@ -19,8 +19,6 @@ import org.firstinspires.ftc.teamcode.Tools.ControlledDrive;
 import org.firstinspires.ftc.teamcode.Tools.OmniWheel;
 import org.firstinspires.ftc.teamcode.Tools.PositionEnum;
 
-import sun.awt.www.content.audio.wav;
-
 import java.util.Date;
 
 public abstract class BaseAutonomous extends LinearOpMode {
@@ -77,19 +75,17 @@ public abstract class BaseAutonomous extends LinearOpMode {
 
         // middle barcode mark
         controlledDrive.start(-18, 0, 0.2);
-        while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
-                robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
-                robot.motor_rear_right.isBusy())) {
+        while (opModeIsActive() && !controlledDrive.test_acc(100)) {
             if (isBarcodeStoneNear()) {
                 counter ++;
             }
         }
+        controlledDrive.stop();
 
         // check if the sensor found the duck / .. more than n_counters times
         if (counter > n_counters) {
             barcodePosition = PositionEnum.Middle;
         }
-        controlledDrive.stop();
 
         // skip if the duck / cube / .. was already detected
         if (barcodePosition == PositionEnum.unknown) {
@@ -97,9 +93,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
 
             // the barcode marker next to the wall
             controlledDrive.start(-18, 0, 0.2);
-            while (opModeIsActive() && (robot.motor_front_left.isBusy() ||
-                    robot.motor_front_right.isBusy() || robot.motor_rear_left.isBusy() ||
-                    robot.motor_rear_right.isBusy())) {
+            while (opModeIsActive() && !controlledDrive.test_acc(100)) {
                 if (isBarcodeStoneNear()) {
                     counter ++;
                 }
@@ -113,7 +107,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
         }
         
         // flip the psitions if getAllianceColor is red
-        if (getAllianceColor() == colorEnum.Red && barcodePosition == PositionEnum.Bottom) {
+        if (getAllianceColor() == ColorEnum.Red && barcodePosition == PositionEnum.Bottom) {
             barcodePosition = PositionEnum.Top;
         }
 
@@ -133,8 +127,12 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void driveToCarousel() {
+        double dirMul=1;
+        if (getAllianceColor() != ColorEnum.Blue) {
+            dirMul = -1;
+        }
         // detect barcode
-        omniWheel.setMotors(-0.15, 0, 0); // changed 025 to 015
+        omniWheel.setMotors(-0.15, 0, 0); // changed 025 to 015 + -0.01 drive against the wall
         while (!(robot.distanceSensor_carousel.getDistance(DistanceUnit.CM) < 20) && opModeIsActive()) {
         } // 15 to 20
         omniWheel.setMotors(0, 0, 0);
@@ -147,7 +145,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
                 break;
             }
         } // wait a moment
-        omniWheel.setMotors(0, 0, 0.001);
+        omniWheel.setMotors(0, 0, 0.001*dirMul);
     }
 
     public void rotateCarousel() {
@@ -173,10 +171,11 @@ public abstract class BaseAutonomous extends LinearOpMode {
     public void driveToShippingHub() {
         double angleError;
         double vr = 0;
+        int encoderAmount = 0;
         Orientation angles;
 
         // drive back
-        controlledDrive.drive(125, 0, 0.2);
+        controlledDrive.drive_with_acc(125, 0, 0.2, 100);
 
         do {
             angles = hwgy.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
@@ -200,17 +199,27 @@ public abstract class BaseAutonomous extends LinearOpMode {
         // rotate until the error is > -5 and < 5
         omniWheel.setMotors(0, 0, 0);
 
+        // start driving forward
+        controlledDrive.start(35,0,0.2);
+
         // get a clear view (move the lift out of the way from the dis sensor)
         robot.motor_lift.setTargetPosition(liftStartPos + 800);
         robot.motor_lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         robot.motor_lift.setPower(0.2);
-        while (robot.motor_lift.isBusy() && opModeIsActive()) {
+        while (robot.motor_lift.isBusy() && opModeIsActive() && !controlledDrive.test_acc(100)) {
+            if (controlledDrive.test_acc(100)) {
+                controlledDrive.stop();
+            }
+            if (!robot.motor_lift.isBusy()) {
+                robot.motor_lift.setPower(0);
+                robot.motor_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+            }
         }
+
+        // to make shure, that the robot stop moving stuff
         robot.motor_lift.setPower(0);
         robot.motor_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-
-        // forward to the ShippingHub
-        controlledDrive.drive(35, 0, 0.2);
+        controlledDrive.stop();
     }
 
     public void placeElementAtPosition(PositionEnum position) {
@@ -253,7 +262,7 @@ public abstract class BaseAutonomous extends LinearOpMode {
     }
 
     public void driveToWall() {
-        controlledDrive.drive(-37, 0, 0.2);
+        controlledDrive.drive_with_acc(-37, 0, 0.2, 100);
     }
 
     public void parkInWarehouse() {
@@ -264,6 +273,6 @@ public abstract class BaseAutonomous extends LinearOpMode {
         }
         omniWheel.setMotors(0, 0, 0);
 
-        controlledDrive.drive(0, -20 * dirMul, 0.2);
+        controlledDrive.drive_with_acc(0, -30 * dirMul, 0.2, 100);
     }
 }
