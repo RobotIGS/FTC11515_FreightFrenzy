@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+
 @TeleOp
 public class FullControl extends BaseTeleOp {
     boolean intake;
@@ -26,6 +28,8 @@ public class FullControl extends BaseTeleOp {
                 gamepad1.left_stick_x * 0.7,
                 gamepad1.right_stick_x * 0.2
         );
+
+        telemetry.addData("dis", robot.distanceSensor_right.getDistance(DistanceUnit.CM));
 
         // make the lift slower at the end region of the allowed movement region
         if (diff > -300 || diff < -4100) {
