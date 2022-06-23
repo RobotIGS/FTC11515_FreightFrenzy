@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Tools;
 
+import java.lang.reflect.Parameter;
+
 import com.qualcomm.robotcore.hardware.DcMotor;
 import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
 
@@ -14,9 +16,9 @@ public class FieldNavigation {
     static final double WHEEL_DIAMETER_CMS = 10.0;     // For figuring circumference
     static final double COUNTS_PER_CM = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) / (WHEEL_DIAMETER_CMS * Math.PI);
 
-    // robot stuff (constants)
+   // robot stuff (constants)
     static final double lx = 1;
-    static final double ly = 1;
+    static final double lz = 1;
 
     // last steps of the motors
     private double last_steps_fl;
@@ -26,42 +28,54 @@ public class FieldNavigation {
 
     // position of the robot
     public double position_x;
-    public double position_y;
+    public double position_z;
+
+    // rotation of the robot
+    public double rotation_y;
 
     // controlled drive
-    private boolean drive;
+    private boolean drive = false;
     private double drive_acc;
-    private boolean target_reached;
+    private boolean target_reached = false;
 
     /* constructor */
 
-    public FieldNavigation(BaseHardwareMap robot, double x, double y) {
+    /**
+     * one class to rule them all, (for the navigation of the robot)
+     * @param robot BaseHardwareMap object
+     * @param x     x start location
+     * @param z     z start location
+     * @param ry    start y rotation
+     */
+    public FieldNavigation(BaseHardwareMap robot, double x, double z, double ry) {
+        // hardware
         this.robot = robot;
+
+        // set start steps
         last_steps_fl = robot.motor_front_left.getCurrentPosition();
         last_steps_fr = robot.motor_front_right.getCurrentPosition();
         last_steps_rl = robot.motor_rear_left.getCurrentPosition();
         last_steps_rr = robot.motor_rear_right.getCurrentPosition();
 
-        position_x = x;
-        position_y = y;
-
-        drive = false;
-        target_reached = false;
-    }
+        // robot position and rotation
+        this.position_x = x;
+        this.position_z = z;
+        this.rotation_y = ry;
+   }
 
     /**
      * calculate the speed of the motors out of the speed from the robot
      * @param vx spped in x direction
-     * @param vy spped in y direction
-     * @param wz rotation speed (0)
+     * @param vz spped in y direction
+     * @param wy rotation speed (0)
      * @return an array with motor speeds (4x1) (front left, front right, rear left, rear right)
      */
-    private double[] calculateWheelSpeeds(double vx, double vy, double wz) {
+    private double[] calculateWheelSpeeds(double vx, double vz, double wy) {
         double[] wheelSpeeds = {
-            vx + vy - wz,
-            vx - vy + wz,
-            vx - vy - wz,
-            vx + vy + wz
+            vx + vz - wy,
+            vx - vz + wy,
+            vx - vz - wy,
+            vx + vz + wy
         };
 
         return wheelSpeeds;
@@ -70,7 +84,7 @@ public class FieldNavigation {
     /**
      * calculate wheel step targets
      * @param wheelSpeeds an array with the speeds of the motors (return from calculateWheelSpeeds)
-     * @param maxDistance the absolute maximum distance of x and y in cm
+     * @param maxDistance the absolute maximum distance of x and z in cm
      * @return an array with the motor targets (4x1) (front left, front right, rear left, rear right)
      */
     private double[] calculateWheelTargets(double[] wheelSpeeds, double maxDistance) {
@@ -88,18 +102,18 @@ public class FieldNavigation {
     /**
      * set the step targets of the motors and start driving to them
      * @param dx distance in x direction in cm relative to the robot
-     * @param dy distance in y direction in cm relative to the robot
+     * @param dz distance in z direction in cm relative to the robot
      */
-    private void setWheelTargets(double dx, double dy, double speed) {
+    private void setWheelTargets(double dx, double dz, double speed) {
         // calculate max distance 
-        double d_max = Math.max(Math.abs(dx), Math.abs(dy));
+        double d_max = Math.max(Math.abs(dx), Math.abs(dz));
 
         // normalize (vals from -1 to 1) -> translate to relative speeds
         dx /= d_max;
-        dy /= d_max;
+        dz /= d_max;
 
         // get wheelSpeeds
-        double[] wheelSpeeds = calculateWheelSpeeds(dx,dy,0);
+        double[] wheelSpeeds = calculateWheelSpeeds(dx,dz,0);
 
         // get targets
         double wheelTargets[] = calculateWheelTargets(wheelSpeeds, d_max);
@@ -131,12 +145,12 @@ public class FieldNavigation {
     /**
      * drive a specified distance relative to the robot current position and rotation with a specified accuracy
      * @param dx    distance in x direction
-     * @param dy    distance in y direction
+     * @param dz    distance in z direction
      * @param speed speed
      * @param acc   accuracy in cm (per motor)
      */
-    public void drive_rel(double dx, double dy, double speed, double acc) {
-        setWheelTargets(dx,dy,speed);
+    public void drive_rel(double dx, double dz, double speed, double acc) {
+        setWheelTargets(dx,dz,speed);
 
         // set drive flag and target acc
         drive = true;
@@ -147,34 +161,34 @@ public class FieldNavigation {
     /**
      * drive a specified distance relative to the robot current position and rotation
      * @param dx    distance in x direction
-     * @param dy    distance in y direction
+     * @param dz    distance in z direction
      * @param speed speed
      */
-    public void drive_rel(double dx, double dy, double speed) {
-        drive_rel(dx,dy,speed,0);
+    public void drive_rel(double dx, double dz, double speed) {
+        drive_rel(dx,dz,speed,0);
     }
 
     /**
      * drive to a coordinate on the field with a specified accuracy
      * @param x     x coordinate
-     * @param y     y coordinate
+     * @param z     z coordinate
      * @param speed speed
      * @param acc   accuracy in cm (per motor)
      */
-    public void drive_to_pos(double x, double y, double speed, double acc) {
+    public void drive_to_pos(double x, double z, double speed, double acc) {
         // TODO
-        // calc rel dis from pos to (x|y) remember to use the robot rotation in the calculation
+        // calc rel dis from pos to (x|z) remember to use the robot rotation in the calculation
         // set targets using drive_rel
     }
 
     /**
      * drive to a coordinate on the field
      * @param x     x coordinate
-     * @param y     y coordinate
+     * @param z     z coordinate
      * @param speed speed
      */
-    public void drive_to_pos(double x, double y, double speed) {
-        drive_to_pos(x,y,speed,0);
+    public void drive_to_pos(double x, double z, double speed) {
+        drive_to_pos(x,z,speed,0);
     }
 
     /**
@@ -235,11 +249,6 @@ public class FieldNavigation {
     }
 
     /**
-     * camera navigation stuff
-     */
-    private void stepCam() {}
-
-    /**
      * navigation based on motor movement
      */
     private void stepPos() {
@@ -250,12 +259,19 @@ public class FieldNavigation {
         double delta_s4 = last_steps_rr - robot.motor_rear_right.getCurrentPosition();
 
         // calculate the distance
-        double dx = ( delta_s1 + delta_s2 + delta_s3 + delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
-        double dy = (delta_s1 - delta_s2 - delta_s3 + delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
+        double dx = (delta_s1 + delta_s2 + delta_s3 + delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
+        double dz = (delta_s1 - delta_s2 - delta_s3 + delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
 
         // set new position
-        position_x -= dx;
-        position_y -= dy;
+        // TODO use robot rotation!!!
+        double d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz,2));
+        if (d == 0) {
+            return;
+        }
+        double alpha = Math.asin(dx/d) - Math.toRadians(rotation_y);
+
+        this.position_x -= Math.sin(alpha)*d;
+        this.position_z -= Math.cos(alpha)*d;
 
         // set new last steps for next calculations
         last_steps_fl -= delta_s1;
@@ -279,6 +295,5 @@ public class FieldNavigation {
     public void step() {
         stepDrive();
         stepPos();
-        stepCam();
     }
 }
