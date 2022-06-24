@@ -14,7 +14,6 @@ public class TestFieldNavigation extends BaseTeleOp {
     private GyroHardwareMap gyro;
     private FieldNavigation navi;
 
-
     boolean started = false;
 
     @Override

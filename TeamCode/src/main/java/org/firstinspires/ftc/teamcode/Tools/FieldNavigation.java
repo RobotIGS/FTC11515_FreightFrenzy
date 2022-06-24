@@ -61,7 +61,6 @@ public class FieldNavigation {
     private double start_rotation_y;
     private double gyro_start_rotation;
 
-
     /* constructor */
 
     /**
@@ -78,7 +77,6 @@ public class FieldNavigation {
 
         // set start rotation (gyro)
         gyro_start_rotation = gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-
         // set start steps
         last_steps_fl = robot.motor_front_left.getCurrentPosition();
         last_steps_fr = robot.motor_front_right.getCurrentPosition();
