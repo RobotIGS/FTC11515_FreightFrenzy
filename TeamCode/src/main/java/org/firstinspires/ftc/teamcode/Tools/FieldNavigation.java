@@ -27,10 +27,6 @@ public class FieldNavigation {
     private static final double lx = 1;
     private static final double lz = 1;
 
-    /*
-     * live data
-    */
-
     // last steps of the motors
     private double last_steps_fl;
     private double last_steps_fr;
@@ -45,21 +41,19 @@ public class FieldNavigation {
     // position of the robot
     public double position_x;
     public double position_z;
-
-    // rotation of the robot
     public double rotation_y;
 
+    // wheel speeds
     private double wheelSpeeds[] = {0,0,0,0};
 
-    /*
-     * target data
-    */
+    // drive flags
+    private boolean drive = false;
+    private boolean target_reached = false;
 
     // target position for navigation
     private double target_position_x;
     private double target_position_z;
-    private double target_step_position_x;
-    private double target_step_position_z;
+    private double drive_speed;
     private double drive_acc;
 
     // target rotation of the robot
@@ -67,21 +61,6 @@ public class FieldNavigation {
     private double start_rotation_y;
     private double gyro_start_rotation;
 
-    /*
-     * drive constants
-    */
-
-    private static final double DRIVE_STEP_ACC = 4;
-    private static final double DRIVE_STEP_LENGTH = 10; // max cm
-
-    /*
-     * drive flags and vars
-    */
-
-    private boolean drive = false;
-    private boolean target_reached = false;
-    private double drive_target_acc;
-    private double drive_speed;
 
     /* constructor */
 
@@ -92,14 +71,13 @@ public class FieldNavigation {
      * @param z     z start location
      * @param ry    start y rotation
      */
-    public FieldNavigation(BaseHardwareMap robot, double x, double z, double ry) {
+    public FieldNavigation(BaseHardwareMap robot, GyroHardwareMap gyro, double x, double z, double ry) {
         // hardware
         this.robot = robot;
-        gyro = new GyroHardwareMap(hardwareMap);
-        hwgy.init(hardwareMap);
+        this.gyro = gyro;
 
         // set start rotation (gyro)
-        gyro_start_rotation = gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle();
+        gyro_start_rotation = gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
 
         // set start steps
         last_steps_fl = robot.motor_front_left.getCurrentPosition();
@@ -121,11 +99,11 @@ public class FieldNavigation {
      * @param wy rotation speed (0)
      * @return an array with motor speeds (4x1) (front left, front right, rear left, rear right)
      */
-    private double[] calculateWheelSpeeds(double vx, double vz, double wy) {
-        wheelSpeeds[0] = vx - vz - wy;
-        wheelSpeeds[1] = vx + vz + wy;
-        wheelSpeeds[2] = vx + vz - wy;
-        wheelSpeeds[3] = vx - vz + wy;
+    private void calculateWheelSpeeds(double vx, double vz, double wy) {
+        wheelSpeeds[0] = vx + -vz - (lx+lz)*wy;
+        wheelSpeeds[1] = vx - -vz + (lx+lz)*wy;
+        wheelSpeeds[2] = vx - -vz - (lx+lz)*wy;
+        wheelSpeeds[3] = vx + -vz + (lx+lz)*wy;
     }
 
     /**
@@ -147,46 +125,47 @@ public class FieldNavigation {
     }
 
     /**
-     * set the step targets of the motors and start driving to them
-     * @param dx distance in x direction in cm relative to the robot
-     * @param dz distance in z direction in cm relative to the robot
+     * convert distance (field cord system) into distance rel to robot
+     * @param dx distance in x direction relative to the robot (field cord system)
+     * @param dz distance in z direction relative to the robot (field cord system)
+     * @return   an Array [0]: distance in x, [1]: distance in z
      */
-    private void setWheelTargets(double dx, double dz, double speed) {
-        // calculate max distance 
-        double d_max = Math.max(Math.abs(dx), Math.abs(dz));
-
-        // normalize (vals from -1 to 1) -> translate to relative speeds
-        dx /= d_max;
-        dz /= d_max;
-
-        // get wheelSpeeds
-        calculateWheelSpeeds(dx,dz,0);
-
-        // get targets
-        double wheelTargets[] = calculateWheelTargets(wheelSpeeds, d_max);
-
-        // set targets
-        robot.motor_front_left.setTargetPosition((int) wheelTargets[0]);
-        robot.motor_front_right.setTargetPosition((int) wheelTargets[1]);
-        robot.motor_rear_left.setTargetPosition((int) wheelTargets[2]);
-        robot.motor_rear_right.setTargetPosition((int) wheelTargets[3]);
-
-        // Turn On RUN_TO_POSITION mode
-        robot.motor_front_left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.motor_front_right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.motor_rear_left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        robot.motor_rear_right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-        // check speed
-        if (speed > 1 || speed < -1) {
-            speed /= Math.abs(speed);
+    private double[] convert_pos2rel(double dx, double dz) {
+        double d = Math.sqrt(Math.pow(dx,2) + Math.pow(dz,2));
+        if (d == 0) {
+            double ret[] = {0,0};
+            return ret;
         }
 
-        // set motor power
-        robot.motor_front_left.setPower(wheelSpeeds[0] * speed);
-        robot.motor_front_right.setPower(wheelSpeeds[1] * speed);
-        robot.motor_rear_left.setPower(wheelSpeeds[2] * speed);
-        robot.motor_rear_right.setPower(wheelSpeeds[3] * speed);
+        double alpha = Math.asin(dz/d) - Math.toRadians(rotation_y);
+        double[] ret = {
+            Math.cos(alpha) * d,
+            Math.sin(alpha) * d
+        };
+
+        return ret;
+    }
+
+    /**
+     * convert rel distance from robot to distance (field cord system) rel to robot
+     * @param dx distance in x direction relative to the robot
+     * @param dz distance in z direction relative to the robot
+     * @return   an Array [0]: distance in x, [1]: distance in z
+     */
+    private double[] convert_rel2pos(double dx, double dz) {
+        double d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz,2));
+        if (d == 0) {
+            double ret[] = {0,0};
+            return ret;
+        }
+
+        double alpha = Math.asin(dz/d) + Math.toRadians(rotation_y);
+        double[] ret = {
+            Math.cos(alpha)*d,
+            Math.sin(alpha)*d
+        };
+
+        return ret;
     }
 
     /**
@@ -194,42 +173,21 @@ public class FieldNavigation {
      * @param dx    distance in x direction
      * @param dz    distance in z direction
      * @param speed speed
-     * @param acc   accuracy in cm (per motor)
+     * @param acc   accuracy in cm
      */
     public void drive_rel(double dx, double dz, double speed, double acc) {
-        setWheelTargets(dx,dz,speed);
+        // convert rel2pos
+        double[] pos = convert_rel2pos(dx,dz);
+
+        // set target pos
+        target_position_x = pos[0];
+        target_position_z = pos[1];
 
         // set drive flag and target acc
         drive = true;
-        drive_target_acc = acc;
-        target_reached = false;
-        target_step_reached = true;
-    }
-
-    /**
-     * drive a specified distance relative to the robot current position and rotation
-     * @param dx    distance in x direction
-     * @param dz    distance in z direction
-     * @param speed speed
-     */
-    public void drive_rel(double dx, double dz, double speed) {
-        drive_rel(dx,dz,speed,0);
-    }
-
-    /**
-     * set target position
-     * @param x     x coordinate
-     * @param z     z coordinate
-     * @param speed speed
-     * @param acc   accuracy in cm (per motor)
-     */
-    public void set_target_position(double x, double z, double speed, double acc) {
-        // TODO
-        // set target position
-        drive_target_acc = acc;
         drive_speed = speed;
-        target_step_reached = true;
-        //drive_rel
+        drive_acc = acc;
+        target_reached = false;
     }
 
     /**
@@ -237,20 +195,18 @@ public class FieldNavigation {
      * @param x     x coordinate
      * @param z     z coordinate
      * @param speed speed
-     * @param acc   accuracy in cm (per motor)
+     * @param acc   accuracy in cm
      */
     public void drive_to_pos(double x, double z, double speed, double acc) {
-        // TODO calc rel to robot -> drive_rel (USING STEP TARGETS!!!!)
-    }
+        // set target pos
+        target_position_x = x;
+        target_position_z = z;
 
-    /**
-     * drive to a coordinate on the field
-     * @param x     x coordinate
-     * @param z     z coordinate
-     * @param speed speed
-     */
-    public void drive_to_pos(double x, double z, double speed) {
-        drive_to_pos(x,z,speed,0);
+        // set drive stuff
+        drive = true;
+        drive_speed = speed;
+        drive_acc = acc;
+        target_reached = false;
     }
 
     /**
@@ -292,17 +248,12 @@ public class FieldNavigation {
      * stop controlled drive
      */
     public void drive_stop() {
-        // Stop all motion;
-        robot.motor_front_left.setPower(0);
-        robot.motor_front_right.setPower(0);
-        robot.motor_rear_left.setPower(0);
-        robot.motor_rear_right.setPower(0);
+        // overwrite vx and vz
+        vx = 0;
+        vz = 0;
 
-        // Turn off RUN_TO_POSITION
-        robot.motor_front_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.motor_front_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.motor_rear_left.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        robot.motor_rear_right.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        // Stop all motion;
+        drive_setMotors(0, 0, 0, 0);
 
         // set drive flag
         drive = false;
@@ -310,15 +261,32 @@ public class FieldNavigation {
 
     /**
      * test if the driving target was reached
-     * @return a Boolean if the target was reached
+     * @return a Boolean indecating if the target was reached
      */
-    public boolean drive_finished() {
+    public boolean target_reached() {
+        double d = Math.sqrt(Math.pow(target_position_x - position_x, 2) + Math.pow(target_position_z - position_z, 2));
+        if (d <= Math.abs(drive_acc)) {
+            // overwrite flags
+            drive = false;
+            target_reached = true;
+
+            // overwrite vx and vz
+            vx = 0;
+            vz = 0;
+        }
         return target_reached;
     }
 
     /**
-     * navigation based on motor movement
+     * PID Regulator
      */
+    private void PID() {
+        double error = target_rotation_y - rotation_y;
+        wy = error/180 * 0.2;   // P
+        wy += 0;                // I
+        wy += 0;                // D
+    }
+
     private void stepPos() {
         // get delta steps
         double delta_s1 = last_steps_fl - robot.motor_front_left.getCurrentPosition();
@@ -328,17 +296,17 @@ public class FieldNavigation {
 
         // calculate the distance
         double dx = (delta_s1 + delta_s2 + delta_s3 + delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
-        double dz = (delta_s1 - delta_s2 - delta_s3 + delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
+        double dz = (-delta_s1 + delta_s2 + delta_s3 - delta_s4) * ((2*Math.PI) / COUNTS_PER_MOTOR_REV);
 
         // set new position
         double d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz,2));
         if (d == 0) {
             return;
         }
-        double alpha = Math.asin(dx/d) - Math.toRadians(rotation_y);
+        double alpha = Math.asin(dz/d) + Math.toRadians(rotation_y);
 
-        this.position_x -= Math.sin(alpha)*d;
-        this.position_z -= Math.cos(alpha)*d;
+        this.position_x -= Math.cos(alpha)*d;
+        this.position_z -= Math.sin(alpha)*d;
 
         // set new last steps for next calculations
         last_steps_fl -= delta_s1;
@@ -347,51 +315,39 @@ public class FieldNavigation {
         last_steps_rr -= delta_s4;
     }
 
-    /**
-     * controlled drive stuff
-     */
     private void stepDrive() {
-        if (drive) {
-            if (target_step_reached) {
-                // test if target is reached
-                double distance_to_target = Math.sqrt(Math.pow(position_x - target_position_x, 2) + Math.pow(position_z - target_position_z, 2));
+        if (drive && !target_reached()) {
+            // get distance to target
+            vx = target_position_x - position_x;
+            vz = target_position_z - position_z;
 
-                // test if real target is reached
-                if (distance_to_target < drive_target_acc) {
-                    drive_stop();
-                } else {
-                    // step target
-                    if (distance_to_target > DRIVE_STEP_LENGTH) {
-                        double dr = Math.sqrt(Math.pow(target_position_x - position_x, 2) + Math.pow(target_position_z - position_z, 2)) / DRIVE_STEP_LENGTH;
-                        target_step_position_x = position_x + (target_position_x - position_x) / dr;
-                        target_step_position_z = position_z + (target_position_z - position_z) / dr;
-                        drive_acc = DRIVE_STEP_ACC;
-                    }
+            // transform pos2rel
+            double[] rel = convert_pos2rel(vx,vz);
+            vx = rel[0];
+            vz = rel[1];
 
-                    // real target
-                    else {
-                        target_step_position_x = target_position_x;
-                        target_step_position_z = target_position_z;
-                        drive_acc = drive_target_acc;
-                    }
+            // get max distance
+            double maxDistance = Math.max(Math.abs(vx), Math.abs(vz));
 
-                    // test if (step) target is reached
-                    if (Math.sqrt(Math.pow(position_x - target_step_position_x, 2) + Math.pow(position_z - target_step_position_z, 2)) < drive_acc) {
-                        target_step_reached = true;
-                    }
-                }
-            }
+            // get direction speeds in percent
+            vx /= maxDistance;
+            vz /= maxDistance;
         }
+        // set motor speeds
+        drive_setMotors(vx, vz, wy, drive_speed);
     }
 
     private void stepGyro() {
         // get rotation based on the start rotation
-        rotation_y = gyro_start_rotation - gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle() + start_rotation_y;
+        rotation_y = gyro_start_rotation - gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle + start_rotation_y;
 
-        if (Math.abs(rotation_y) > 180) {
-            // TODO fix this syntax error
-            rotation_y += 180 *(rotation_y % 180) * (rotation_y < 0);
+        if (rotation_y < -180) {
+            rotation_y += 180 *(rotation_y % 180);
+        } else if (rotation_y > 180) {
+            rotation_y -= 180 *(rotation_y % 180);
         }
+
+        this.PID();
     }
 
     /**
