@@ -66,6 +66,7 @@ public class FieldNavigation {
     /**
      * one class to rule them all, (for the navigation of the robot)
      * @param robot BaseHardwareMap object
+     * @param gyro  GyroHardwareMap object
      * @param x     x start location
      * @param z     z start location
      * @param ry    start y rotation
