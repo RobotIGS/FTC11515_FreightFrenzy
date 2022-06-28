@@ -5,8 +5,7 @@ package org.firstinspires.ftc.teamcode.Tools;
 import java.lang.reflect.Parameter;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
-import org.firstinspires.ftc.teamcode.HardwareMaps.GyroHardwareMap;
+
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -14,8 +13,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 */
 
-import org.firstinspires.ftc.teamcode.Tools.FieldNavigation;
-
+// import org.firstinspires.ftc.teamcode.Tools.FieldNavigation;
+import org.firstinspires.ftc.teamcode.HardwareMaps.BaseHardwareMap;
+import org.firstinspires.ftc.teamcode.HardwareMaps.GyroHardwareMap;
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.matrices.OpenGLMatrix;
@@ -49,6 +49,8 @@ public class FieldNavigationCamera extends FieldNavigation {
     private List<VuforiaTrackable> image_targets_array;
     private WebcamName camera;
 
+    private VuforiaLocalizer.Parameters parameters;
+
     private boolean targetVisible       = false;
 
     // camera placement
@@ -69,33 +71,17 @@ public class FieldNavigationCamera extends FieldNavigation {
      * @param cam_ry camera y rotation on robot
      * @param cam_rz camera z rotation on robot
      */
+
     public FieldNavigationCamera(BaseHardwareMap robot, GyroHardwareMap gyro, WebcamName camera,
         double x, double z, double ry,
         double cam_x, double cam_y, double cam_z,
         double cam_rx, double cam_ry, double cam_rz) {
-        // hardware
-        this.robot = robot;
-        this.gyro = gyro;
-        this.camera = camera;
-
-        // set start rotation (gyro)
-        gyro_start_rotation = gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-        // set start steps
-        last_steps_fl = robot.motor_front_left.getCurrentPosition();
-        last_steps_fr = robot.motor_front_right.getCurrentPosition();
-        last_steps_rl = robot.motor_rear_left.getCurrentPosition();
-        last_steps_rr = robot.motor_rear_right.getCurrentPosition();
-
-        // robot position and rotation
-        position_x = x;
-        position_z = z;
-        rotation_y = ry;
-        start_rotation_y = ry;
+        super(robot, gyro, x, z, ry);
 
         // camera location
         cameraLocationOnRobot = OpenGLMatrix
-                .translation(cam_x, cam_y, cam_z)
-                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XZY, DEGREES, cam_rx, cam_rz, cam_ry));
+                .translation((float) cam_x, (float) cam_y, (float) cam_z)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XZY, DEGREES, (float) cam_rx, (float) cam_rz, (float) cam_ry));
 
         // set vuforia tracking parameters (config)
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -110,7 +96,7 @@ public class FieldNavigationCamera extends FieldNavigation {
 
         // For convenience, gather together all the trackable objects in one easily-iterable collection */
         image_targets_array = new ArrayList<VuforiaTrackable>();
-        allTrackables.addAll(targets);
+        image_targets_array.addAll(image_targets);
 
         // name and locate each trackable object
         //             id  name                  x y z  rx ry rz
@@ -143,7 +129,7 @@ public class FieldNavigationCamera extends FieldNavigation {
     /**
      * update camera position relative to the robot
      */
-    private updateCameraPlacement() {
+    private void updateCameraPlacement() {
         /*  Let all the trackable listeners know where the camera is.  */
         for (VuforiaTrackable trackable : image_targets_array) {
             ((VuforiaTrackableDefaultListener) trackable.getListener()).setCameraLocationOnRobot(parameters.cameraName, cameraLocationOnRobot);
@@ -190,5 +176,11 @@ public class FieldNavigationCamera extends FieldNavigation {
         if (use_cam) {
             stepCam();
         }
+    }
+    private void identifyTarget(int targetIndex, String targetName, float dx, float dy, float dz, float rx, float ry, float rz) {
+        VuforiaTrackable aTarget = image_targets.get(targetIndex);
+        aTarget.setName(targetName);
+        aTarget.setLocation(OpenGLMatrix.translation(dx, dy, dz)
+                .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XYZ, DEGREES, rx, ry, rz)));
     }
 }

@@ -286,7 +286,7 @@ public class FieldNavigation {
         wy += 0;                // D
     }
 
-    private void stepPos() {
+    protected void stepPos() {
         // get delta steps
         double delta_s1 = last_steps_fl - robot.motor_front_left.getCurrentPosition();
         double delta_s2 = last_steps_fr - robot.motor_front_right.getCurrentPosition();
@@ -314,7 +314,7 @@ public class FieldNavigation {
         last_steps_rr -= delta_s4;
     }
 
-    private void stepDrive() {
+    protected void stepDrive() {
         if (drive && !target_reached()) {
             // get distance to target
             vx = target_position_x - position_x;
@@ -336,7 +336,7 @@ public class FieldNavigation {
         drive_setMotors(vx, vz, wy, drive_speed);
     }
 
-    private void stepGyro() {
+    protected void stepGyro() {
         // get rotation based on the start rotation
         rotation_y = gyro_start_rotation - gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle + start_rotation_y;
 
