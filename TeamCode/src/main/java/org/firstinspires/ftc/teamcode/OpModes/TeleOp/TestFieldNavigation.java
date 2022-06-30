@@ -26,7 +26,7 @@ public class TestFieldNavigation extends BaseTeleOp {
 
     @Override
     public void loop() {
-        navi.drive_setMotors(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x/2, 0.4);
+        navi.drive_setSpeeds(gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x/2, 0.4);
 
         navi.step();
 
