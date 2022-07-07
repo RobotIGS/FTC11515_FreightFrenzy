@@ -35,6 +35,14 @@ public class TestFieldNavigation extends BaseTeleOp {
                 navi.drive_to_pos(100, -100, 0.2, 1);
             } else if (gamepad1.y) {
                 navi.drive_to_pos(0, -100, 0.2, 1);
+            } else if (gamepad1.dpad_down) {
+                navi.set_targetRotation(navi.rotation_y);
+            } else if (gamepad1.dpad_left) {
+                navi.set_targetRotation(90);
+            } else if (gamepad1.dpad_right) {
+                navi.set_targetRotation(-90);
+            } else if (gamepad1.dpad_up) {
+                navi.stepGyro();
             } else {
                 navi.drive_setSpeed(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x / 2, 0.4);
             }

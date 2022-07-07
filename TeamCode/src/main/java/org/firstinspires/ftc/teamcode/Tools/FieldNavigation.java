@@ -91,6 +91,7 @@ public class FieldNavigation {
         position_z = z;
         rotation_y = ry;
         start_rotation_y = ry;
+        target_rotation_y = ry;
    }
 
     /**
@@ -142,7 +143,7 @@ public class FieldNavigation {
         if (dx < 0) {
             alpha = Math.PI - alpha;
         }
-        alpha += Math.toRadians(rotation_y);
+        alpha -= Math.toRadians(rotation_y);
 
         ret[0] = Math.cos(alpha) * d;
         ret[1] = Math.sin(alpha) * d;
@@ -231,6 +232,15 @@ public class FieldNavigation {
         this.drive = false;
     }
 
+    public void set_targetRotation(double target) {
+        if (target < -180) {
+            target = 180 -(target % 180);
+        } else if (target > 180) {
+            target = -180 + (target % 180);
+        }
+        target_rotation_y = target;
+    }
+
     /**
      * @param vx    speed in x direction
      * @param vz    speed in z direction
@@ -308,6 +318,12 @@ public class FieldNavigation {
         delta_s3 -= gyro_correction_steps[2];
         delta_s4 -= gyro_correction_steps[3];
 
+        // reset gyro correction steps
+        gyro_correction_steps[0] = 0;
+        gyro_correction_steps[1] = 0;
+        gyro_correction_steps[2] = 0;
+        gyro_correction_steps[3] = 0;
+
         // calculate the distance
         double dx = (
                 (R_D_FOUR*delta_s1*TWOPI_D_CPERMREV) +
@@ -352,6 +368,14 @@ public class FieldNavigation {
     }
 
     public void stepGyro() {
+        // get rotation speed
+        rotation_pi_controller.step(target_rotation_y-rotation_y);
+        wy = rotation_pi_controller.out;
+
+        gyro_correction_steps = calculateWheelSpeeds(0,0,wy);
+    }
+
+    protected void stepRotation() {
         // get rotation based on the start rotation
         rotation_y = gyro_start_rotation - gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle + start_rotation_y;
 
@@ -361,16 +385,14 @@ public class FieldNavigation {
             rotation_y = -180 + (rotation_y % 180);
         }
 
-        rotation_pi_controller.step(target_rotation_y-rotation_y);
-        wy = -rotation_pi_controller.out;
-
-        gyro_correction_steps = calculateWheelSpeeds(0,0,wy);
+        rotation_y *= -1;
     }
 
     /**
      * go through every step methode
      */
     public void step() {
+        stepRotation();
         stepDrive();
         stepPos();
 
