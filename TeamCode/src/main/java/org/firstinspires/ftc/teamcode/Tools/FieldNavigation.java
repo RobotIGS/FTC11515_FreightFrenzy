@@ -9,12 +9,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 
 public class FieldNavigation {
     // robot object
-    BaseHardwareMap robot;
-    GyroHardwareMap gyro;
-    PIController rotation_pi_controller = new PIController(0.6/180,0.3);
+    protected BaseHardwareMap robot;
+    protected GyroHardwareMap gyro;
+    protected PIController rotation_pi_controller;
 
     // statics
-    static final double COUNTS_PER_MOTOR_REV = 751.8; // 223rpm
+    protected static final double COUNTS_PER_MOTOR_REV = 751.8; // 223rpm
     //protected static final double COUNTS_PER_MOTOR_REV = 384.5; // 435rpm
     protected static final double DRIVE_GEAR_REDUCTION = 1.0;      // This is < 1.0 if geared UP
     protected static final double WHEEL_DIAMETER_CMS = 10.0;     // For figuring circumference
@@ -28,10 +28,10 @@ public class FieldNavigation {
     protected static final double lz = 1;
 
     // last steps of the motors
-    protected double last_steps_fl;
-    protected double last_steps_fr;
-    protected double last_steps_rl;
-    protected double last_steps_rr;
+    private double last_steps_fl;
+    private double last_steps_fr;
+    private double last_steps_rl;
+    private double last_steps_rr;
 
     private double[] gyro_correction_steps = {0,0,0,0};
 
@@ -46,22 +46,22 @@ public class FieldNavigation {
     public double rotation_y;
 
     // wheel speeds
-    protected double[] wheelSpeeds = {0,0,0,0};
+    private double[] wheelSpeeds = {0,0,0,0};
 
     // drive flags
     public boolean drive = false;
     public boolean target_reached = false;
 
     // target position for navigation
-    protected double target_position_x;
-    protected double target_position_z;
-    protected double drive_speed;
-    protected double drive_acc;
+    private double target_position_x;
+    private double target_position_z;
+    private double drive_speed;
+    private double drive_acc;
 
     // target rotation of the robot
-    protected double target_rotation_y;
-    protected double start_rotation_y;
-    protected double gyro_start_rotation;
+    private double target_rotation_y;
+    private double start_rotation_y;
+    private double gyro_start_rotation;
 
     /* constructor */
 
@@ -72,11 +72,16 @@ public class FieldNavigation {
      * @param x     x start location
      * @param z     z start location
      * @param ry    start y rotation
+     * @param PI_d  PI controller for gyro correction d value (MAXPWR / 180)
+     * @param PI_i  PI controller for gyro correction i value
      */
-    public FieldNavigation(BaseHardwareMap robot, GyroHardwareMap gyro, double x, double z, double ry) {
+    public FieldNavigation(BaseHardwareMap robot, GyroHardwareMap gyro, double x, double z, double ry, double PI_d, double PI_i) {
         // hardware
         this.robot = robot;
         this.gyro = gyro;
+
+        // PI controller
+        rotation_pi_controller = new PIController(PI_d, PI_i);
 
         // set start rotation (gyro)
         gyro_start_rotation = gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
@@ -98,7 +103,7 @@ public class FieldNavigation {
      * calculate the speed of the motors out of the speed from the robot
      * @param vx speed in x direction
      * @param vz speed in y direction
-     * @param wy rotation speed (0)
+     * @param wy rotation speed
      */
     protected double[] calculateWheelSpeeds(double vx, double vz, double wy) {
         return new double[]{
@@ -113,7 +118,7 @@ public class FieldNavigation {
      * calculate wheel step targets
      * @param wheelSpeeds an array with the speeds of the motors (return from calculateWheelSpeeds)
      * @param maxDistance the absolute maximum distance of x and z in cm
-     * @return an array with the motor targets (4x1) (front left, front right, rear left, rear right)
+     * @return an array with the motor targets
      */
     protected double[] calculateWheelTargets(double[] wheelSpeeds, double maxDistance) {
         // relative speed * steps for max Distance
@@ -127,10 +132,10 @@ public class FieldNavigation {
     }
 
     /**
-     * convert distance (field cord system) into distance rel to robot
-     * @param dx distance in x direction relative to the robot (field cord system)
-     * @param dz distance in z direction relative to the robot (field cord system)
-     * @return   an Array [0]: distance in x, [1]: distance in z
+     * convert position (field cord system) into position (robot cord system)
+     * @param dx x position (field cord system)
+     * @param dz z position (field cord system)
+     * @return   an Array with x and z position (robot cord system)
      */
     protected double[] convert_pos2rel(double dx, double dz) {
         double d = Math.sqrt(Math.pow(dx,2) + Math.pow(dz,2));
@@ -152,10 +157,10 @@ public class FieldNavigation {
     }
 
     /**
-     * convert rel distance from robot to distance (field cord system) rel to robot
-     * @param dx distance in x direction relative to the robot
-     * @param dz distance in z direction relative to the robot
-     * @return   an Array [0]: distance in x, [1]: distance in z
+     * convert position (robot cord system) to position (field cord system)
+     * @param dx x position (robot cord system)
+     * @param dz z position (robot cord system)
+     * @return   an Array with x and z position (field cord system)
      */
     protected double[] convert_rel2pos(double dx, double dz) {
         double d = Math.sqrt(Math.pow(dx, 2) + Math.pow(dz,2));
@@ -177,10 +182,10 @@ public class FieldNavigation {
     }
 
     /**
-     * drive a specified distance relative to the robot current position and rotation with a specified accuracy
+     * drive a specified distance relative to the robot current position with a specified accuracy
      * @param dx    distance in x direction
      * @param dz    distance in z direction
-     * @param speed speed
+     * @param speed speed factor
      * @param acc   accuracy in cm
      */
     public void drive_rel(double dx, double dz, double speed, double acc) {
@@ -199,10 +204,10 @@ public class FieldNavigation {
     }
 
     /**
-     * drive to a coordinate on the field with a specified accuracy
+     * drive to a coordinate (field cord system) with a specified accuracy
      * @param x     x coordinate
      * @param z     z coordinate
-     * @param speed speed
+     * @param speed speed factor
      * @param acc   accuracy in cm
      */
     public void drive_to_pos(double x, double z, double speed, double acc) {
@@ -218,11 +223,11 @@ public class FieldNavigation {
     }
 
     /**
-     * set drive speeds
-     * @param vx    speed in x direction
-     * @param vz    speed in z direction
+     * set speeds
+     * @param vx    speed in x direction (robot cord system)
+     * @param vz    speed in z direction (robot cord system)
      * @param wy    rotation speed of the robot
-     * @param speed speed factor between -1 and 1
+     * @param speed speed factor
      */
     public void drive_setSpeed(double vx, double vz, double wy, double speed) {
         this.vx = vx;
@@ -232,6 +237,10 @@ public class FieldNavigation {
         this.drive = false;
     }
 
+    /**
+     * set target rotation
+     * @param target target rotation of the robot (field cord system)
+     */
     public void set_targetRotation(double target) {
         if (target < -180) {
             target = 180 -(target % 180);
@@ -242,12 +251,13 @@ public class FieldNavigation {
     }
 
     /**
-     * @param vx    speed in x direction
-     * @param vz    speed in z direction
+     * set motor speeds
+     * @param vx    speed in x direction (robot cord system)
+     * @param vz    speed in z direction (robot cord system)
      * @param wy    rotation speed of the robot
-     * @param speed speed factor between -1 and 1
+     * @param speed speed factor
      */
-    public void drive_setMotors(double vx, double vz, double wy, double speed) {
+    protected void drive_setMotors(double vx, double vz, double wy, double speed) {
         // make sure the speeds are between -1 and 1
         double vmax = Math.max(Math.abs(vx), Math.abs(vz));
         if (vmax > 0) {
@@ -289,7 +299,7 @@ public class FieldNavigation {
      * test if the driving target was reached
      * @return a Boolean indicating if the target was reached
      */
-    public boolean target_reached() {
+    protected boolean target_reached() {
         double d = Math.sqrt(Math.pow(target_position_x - position_x, 2) + Math.pow(target_position_z - position_z, 2));
         if (d <= Math.abs(drive_acc)) {
             // stop driving
@@ -299,6 +309,9 @@ public class FieldNavigation {
         return target_reached;
     }
 
+    /**
+     * update position based on motor movement since the last step
+     */
     protected void stepPos() {
         // get delta steps
         double delta_s1 = last_steps_fl - robot.motor_front_left.getCurrentPosition();
@@ -342,6 +355,9 @@ public class FieldNavigation {
         this.position_z -= dp[1];
     }
 
+    /**
+     * update motor speeds
+     */
     protected void stepDrive() {
         if (drive && !target_reached()) {
             // gyro correction
@@ -367,7 +383,10 @@ public class FieldNavigation {
         drive_setMotors(vx, vz, wy, drive_speed);
     }
 
-    public void stepGyro() {
+    /**
+     * update rotation speeds
+     */
+    protected void stepGyro() {
         // get rotation speed
         rotation_pi_controller.step(target_rotation_y-rotation_y);
         wy = rotation_pi_controller.out;
@@ -375,6 +394,9 @@ public class FieldNavigation {
         gyro_correction_steps = calculateWheelSpeeds(0,0,wy);
     }
 
+    /**
+     * update robot rotation
+     */
     protected void stepRotation() {
         // get rotation based on the start rotation
         rotation_y = gyro_start_rotation - gyro.imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle + start_rotation_y;
@@ -389,7 +411,7 @@ public class FieldNavigation {
     }
 
     /**
-     * go through every step methode
+     * step methode which executes step methodes
      */
     public void step() {
         stepRotation();

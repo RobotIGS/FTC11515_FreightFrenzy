@@ -2,7 +2,6 @@
 package org.firstinspires.ftc.teamcode.OpModes.TeleOp;
 
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Tools.FieldNavigation;
 import org.firstinspires.ftc.teamcode.HardwareMaps.FullHardwareMap;
@@ -11,24 +10,22 @@ import org.firstinspires.ftc.teamcode.HardwareMaps.GyroHardwareMap;
 
 @TeleOp
 public class TestFieldNavigation extends BaseTeleOp {
-    private GyroHardwareMap gyro;
-    private FieldNavigation navi;
-
-    boolean started = false;
+    GyroHardwareMap gyro;
+    FieldNavigation navi;
 
     @Override
     public void initialize() {
         robot = new FullHardwareMap(hardwareMap);
         gyro = new GyroHardwareMap(hardwareMap);
         gyro.init(hardwareMap);
-        navi = new FieldNavigation(robot,gyro, 0,0,0);
+        navi = new FieldNavigation(robot,gyro, 0,0,0, 0.7/180,0.5);
     }
 
     @Override
     public void loop() {
         if (!navi.drive) {
             if (gamepad1.a) {
-                navi.drive_to_pos(0,0,0.2,1);
+                navi.drive_to_pos(0,0,0.4,1);
             } else if (gamepad1.b) {
                 navi.drive_to_pos(100,0,0.2,1);
             } else if (gamepad1.x) {
@@ -37,14 +34,8 @@ public class TestFieldNavigation extends BaseTeleOp {
                 navi.drive_to_pos(0, -100, 0.2, 1);
             } else if (gamepad1.dpad_down) {
                 navi.set_targetRotation(navi.rotation_y);
-            } else if (gamepad1.dpad_left) {
-                navi.set_targetRotation(90);
-            } else if (gamepad1.dpad_right) {
-                navi.set_targetRotation(-90);
-            } else if (gamepad1.dpad_up) {
-                navi.stepGyro();
             } else {
-                navi.drive_setSpeed(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x / 2, 0.4);
+                navi.drive_setSpeed(-gamepad1.left_stick_y, gamepad1.left_stick_x, gamepad1.right_stick_x / 2, 0.6);
             }
         }
 

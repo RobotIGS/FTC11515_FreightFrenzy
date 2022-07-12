@@ -75,8 +75,9 @@ public class FieldNavigationCamera extends FieldNavigation {
     public FieldNavigationCamera(BaseHardwareMap robot, GyroHardwareMap gyro, WebcamName camera,
         double x, double z, double ry,
         double cam_x, double cam_y, double cam_z,
-        double cam_rx, double cam_ry, double cam_rz) {
-        super(robot, gyro, x, z, ry);
+        double cam_rx, double cam_ry, double cam_rz,
+        double PI_d, double PI_i) {
+        super(robot, gyro, x, z, ry, PI_d, PI_d);
 
         // camera location
         cameraLocationOnRobot = OpenGLMatrix
