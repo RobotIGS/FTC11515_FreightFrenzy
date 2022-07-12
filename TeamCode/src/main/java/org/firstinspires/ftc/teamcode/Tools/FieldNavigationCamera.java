@@ -29,8 +29,6 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.sun.tools.javac.util.Position;
-
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XYZ;
 import static org.firstinspires.ftc.robotcore.external.navigation.AxesOrder.XZY;
@@ -41,7 +39,7 @@ public class FieldNavigationCamera extends FieldNavigation {
     // true -> camera position is used to fix errors in position
     private boolean use_cam = true;
 
-    private static final String VUFORIA_KEY = " --- YOUR NEW VUFORIA KEY GOES HERE  --- ";
+    private static final String VUFORIA_KEY = "AfJ0TyL/////AAABmd78ofn/RkMRi5drULeQkx9J7iXzq0RVLEWyuyfXRDN3IoVgx67f+ACtVorRwa96Jnk49/2xCVBKEeei3RC9zoBnb3genq9MMD6y4kXKbyQIuFN7xispFh7+SfEtm59sNU3R5GJfTAOym68R1IU+4rgY+G4ISATIz3Y9qLBzScQDRqILmn/yGBmC2i+lw8aDepPuAND4he/bkN2ONnp5U8XBAlrZmuPWzRb63RBo5RBdWi19D3h0FOK7KgUV0sgThso9FPVRhDKqB8swS9AqcGIbMo3lqgRA/w7ON5hnRJj6RG+GV+CNDcObyiwMCtEhYaisfR6pNg1NrUTU2Cxgv6291o8fgThPYT9DNKdjz3Um";
 
     // Class Members
     private VuforiaLocalizer vuforia;
@@ -51,7 +49,7 @@ public class FieldNavigationCamera extends FieldNavigation {
 
     private VuforiaLocalizer.Parameters parameters;
 
-    private boolean targetVisible       = false;
+    public boolean targetVisible       = false;
 
     // camera placement
     private OpenGLMatrix cameraLocationOnRobot;
@@ -85,7 +83,7 @@ public class FieldNavigationCamera extends FieldNavigation {
                 .multiplied(Orientation.getRotationMatrix(EXTRINSIC, XZY, DEGREES, (float) cam_rx, (float) cam_rz, (float) cam_ry));
 
         // set vuforia tracking parameters (config)
-        VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
+        parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraName = camera;
         parameters.useExtendedTracking = false;
@@ -101,13 +99,16 @@ public class FieldNavigationCamera extends FieldNavigation {
 
         // name and locate each trackable object
         //             id  name                  x y z  rx ry rz
-        identifyTarget(0, "Blue Storage",        0,0,0, 0, 0, 0);
-        identifyTarget(1, "Blue Alliance Wall",  0,0,0, 0, 0, 0);
-        identifyTarget(2, "Red Storage",         0,0,0, 0, 0, 0);
-        identifyTarget(3, "Red Alliance Wall",   0,0,0, 0, 0, 0);
+        identifyTarget(3, "Blue Storage",        -179.0f,15.24f,-91.0f, 0, 90, 0);
+        identifyTarget(0, "Blue Alliance Wall",  -88.5f,15.24f,180.0f, 0, 180, 0);
+        identifyTarget(1, "Red Storage",         179.0f,15.24f,-90.0f, 0, -90, 0);
+        identifyTarget(2, "Red Alliance Wall",   88.0f,15.24f,179.0f, 0, 180, 0);
 
         // set camera location
         updateCameraPlacement();
+
+        // activate targets
+        image_targets.activate();
     }
 
     /**
@@ -143,6 +144,11 @@ public class FieldNavigationCamera extends FieldNavigation {
      */
     public void enable_cam(boolean use_cam) {
         this.use_cam = use_cam;
+        if (use_cam) {
+            image_targets.activate();
+        } else {
+            image_targets.deactivate();
+        }
     }
 
     private void stepCam() {
@@ -171,7 +177,7 @@ public class FieldNavigationCamera extends FieldNavigation {
      */
     @Override
     public void step() {
-        stepGyro();
+        stepRotation();
         stepDrive();
         stepPos();
         if (use_cam) {
