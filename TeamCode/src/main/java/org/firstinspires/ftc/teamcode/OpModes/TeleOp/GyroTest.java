@@ -27,7 +27,7 @@ public class GyroTest extends OpMode {
 
         telemetry.addData("valuesAngleUnit" , angles.angleUnit);
         telemetry.addData("valuesAcquisitionTime" , angles.acquisitionTime);
-        telemetry.addData("valuesFirstAngle" , angles.firstAngle);
+        telemetry.addData("valuesFirstAngle" , angles.firstAngle); // Den brauchen wir
         telemetry.addData("valuesSecondAngle" , angles.secondAngle);
         telemetry.addData("valuesThirdAngle" , angles.thirdAngle);
         telemetry.addData("valuesAxesOrder" , angles.axesOrder);
