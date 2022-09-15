@@ -17,6 +17,7 @@ public class FullHardwareMap extends BaseHardwareMap {
         motor_front_right = hwMap.get(DcMotor.class, "hub1_motorport2");
         motor_rear_left = hwMap.get(DcMotor.class, "hub1_motorport3");
         motor_rear_right = hwMap.get(DcMotor.class, "hub1_motorport1");
+        /*
         motor_shovel = hwMap.get(DcMotor.class, "hub2_motorport1");
         motor_lift = hwMap.get(DcMotor.class, "hub2_motorport0");
         motor_carousel = hwMap.get(DcMotor.class, "hub2_motorport2");
@@ -41,5 +42,6 @@ public class FullHardwareMap extends BaseHardwareMap {
         motor_lift.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         motor_lift.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+         */
     }
 }
