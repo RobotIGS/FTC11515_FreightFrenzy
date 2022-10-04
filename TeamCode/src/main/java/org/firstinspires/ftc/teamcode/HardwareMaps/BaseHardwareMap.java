@@ -4,6 +4,8 @@ import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 
 public abstract class BaseHardwareMap {
     public HardwareMap hwMap;
@@ -20,6 +22,7 @@ public abstract class BaseHardwareMap {
     public DistanceSensor distanceSensor_left;
     public DistanceSensor distanceSensor_carousel;
     public ColorSensor colorSensor_down;
+    public CRServo servo_Lift;
 
 
     public BaseHardwareMap(HardwareMap hwMap) {
